@@ -1,23 +1,79 @@
-# React + Vite
+# Prescript Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicacion web de Prescript construida con React y Vite. Este frontend consume la API de `prescript_backend` y ofrece el portal operativo para doctores, enfermeria, secretaria, administracion y gerencia.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19
+- Vite
+- React Router
+- Axios
+- Lucide React
+- ESLint
+- Docker y Nginx para despliegue en contenedor
 
-## React Compiler
+## Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Inicio de sesion y activacion de acceso medico.
+- Navegacion protegida por autenticacion.
+- Control de acceso por rol.
+- Agenda de citas.
+- Gestion de pacientes.
+- Captura de preclinica.
+- Editor de recetas.
+- Catalogo y preferencias de medicamentos.
+- Dashboard de KPIs para administracion y gerencia.
 
-## Expanding the ESLint configuration
+## Estructura
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```text
+src/
+  api/              Cliente Axios, tokens y endpoints
+  config/           Configuracion de roles, rutas y navegacion
+  modules/          Pantallas por dominio funcional
+  routes/           Rutas privadas y rutas por rol
+  shared/           Layout, contexto y componentes reutilizables
+```
 
-## Prescript Docker
+## Requisitos
 
-Build y ejecucion del frontend de Prescript:
+- Node.js 20 o superior recomendado.
+- Backend `prescript_backend` disponible.
+- Variable `VITE_API_URL` apuntando a la API.
+
+## Configuracion local
+
+```powershell
+cd C:\Users\InteractiveCore\Documents\ProyectosAnaliza\Prescript_Frontend
+npm install
+Copy-Item .env.example .env
+```
+
+Configura `.env`:
+
+```env
+VITE_API_URL=http://localhost:8003/api/v1
+```
+
+Si ejecutas el backend local sin Docker en el puerto `8001`, usa:
+
+```env
+VITE_API_URL=http://localhost:8001/api/v1
+```
+
+## Ejecucion local
+
+```powershell
+npm run dev
+```
+
+Vite mostrara la URL local disponible, normalmente:
+
+```text
+http://localhost:5173
+```
+
+## Ejecucion con Docker
 
 ```powershell
 cd C:\Users\InteractiveCore\Documents\ProyectosAnaliza\Prescript_Frontend
@@ -30,8 +86,35 @@ La aplicacion queda disponible en:
 http://localhost:5175
 ```
 
-La URL del backend se define en `.env`:
+## Scripts
 
-```env
-VITE_API_URL=http://localhost:8003/api/v1
+```powershell
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Rutas principales
+
+```text
+/login
+/activar-acceso
+/app/agenda
+/app/pacientes
+/app/pacientes/:patientId
+/app/preclinica
+/app/recetas
+/app/medicamentos
+/app/dashboard
+```
+
+## Relacion con el backend
+
+El cliente HTTP esta en `src/api/axios.js`. Usa `VITE_API_URL`, agrega el token JWT en cada solicitud y maneja la renovacion del access token mediante `/auth/refresh`.
+
+Para desarrollo con Docker, el backend esperado por defecto es:
+
+```text
+http://localhost:8003/api/v1
 ```
