@@ -2,8 +2,14 @@ import axios from "axios";
 
 import { clearToken, getRefreshToken, getToken, setToken } from "./tokenStore";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+if (import.meta.env.PROD && !API_BASE_URL) {
+  throw new Error("VITE_API_URL must be configured for production builds.");
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8003/api/v1",
+  baseURL: API_BASE_URL || "http://localhost:8003/api/v1",
   withCredentials: true,
 });
 
