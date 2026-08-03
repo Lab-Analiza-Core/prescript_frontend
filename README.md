@@ -86,6 +86,28 @@ La aplicacion queda disponible en:
 http://localhost:5175
 ```
 
+## Despliegue en Vercel
+
+El proyecto incluye `vercel.json` para desplegar el frontend como SPA de Vite:
+
+- Framework preset: `Vite`
+- Install command: `npm ci`
+- Build command: `npm run build`
+- Output directory: `dist`
+
+Configura en Vercel la variable de entorno:
+
+```env
+VITE_API_URL=https://tu-backend-prescript.com/api/v1
+```
+
+El backend debe permitir el dominio de Vercel en:
+
+```env
+CORS_ALLOWED_ORIGINS=https://tu-frontend.vercel.app
+CSRF_TRUSTED_ORIGINS=https://tu-frontend.vercel.app
+```
+
 ## Scripts
 
 ```powershell
