@@ -2,10 +2,21 @@ import axios from "axios";
 
 import { clearToken, getRefreshToken, getToken, setToken } from "./tokenStore";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const normalizeApiBaseUrl = (value) => {
+  if (!value) return "";
+
+  const baseUrl = value.trim().replace(/\/+$/, "");
+  return baseUrl.endsWith("/api/v1") ? baseUrl : `${baseUrl}/api/v1`;
+};
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
 
 if (import.meta.env.PROD && !API_BASE_URL) {
   throw new Error("VITE_API_URL must be configured for production builds.");
+}
+
+if (import.meta.env.PROD && /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(API_BASE_URL)) {
+  throw new Error("VITE_API_URL cannot point to localhost in production builds.");
 }
 
 const api = axios.create({
