@@ -17,6 +17,7 @@ export function Topbar({ onOpenProfile, onToggleSidebar }) {
       </div>
 
       <div className="session-chip">
+        <span>Turno clinico</span>
         <span>{user?.country}</span>
         <span>{user?.zone}</span>
       </div>

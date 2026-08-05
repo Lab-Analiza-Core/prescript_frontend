@@ -19,7 +19,9 @@ export async function savePreclinicVitals(appointmentId, payload) {
   return response.data;
 }
 
-export async function savePreclinicPatientVitals(patientId, payload) {
-  const response = await api.patch(`/preclinic/patients/${patientId}/vitals`, payload);
+export async function savePreclinicPatientVitals(patientId, payload, date) {
+  const response = await api.patch(`/preclinic/patients/${patientId}/vitals`, payload, {
+    params: date ? { date } : undefined,
+  });
   return response.data;
 }

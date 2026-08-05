@@ -15,7 +15,7 @@ export function Sidebar({ onNavigate, role }) {
         </div>
         <div>
           <strong>Prescript</strong>
-          <span>Consulta</span>
+          <span>Bitacora clinica</span>
         </div>
       </div>
 
@@ -35,7 +35,7 @@ export function Sidebar({ onNavigate, role }) {
 
       <div className="sidebar-footer">
         <HeartPulse size={18} aria-hidden="true" />
-        <span>MVP clinico</span>
+        <span>Ronda activa</span>
       </div>
     </aside>
   );

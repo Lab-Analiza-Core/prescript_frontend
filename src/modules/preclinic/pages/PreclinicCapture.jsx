@@ -49,16 +49,6 @@ const formatTime = (value) => {
   }).format(new Date(value));
 };
 
-const formatDateTime = (value) => {
-  if (!value) return "Sin registro previo";
-  return new Intl.DateTimeFormat("es-HN", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-};
-
 export function PreclinicCapture() {
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -154,7 +144,7 @@ export function PreclinicCapture() {
       const updated =
         selectedSource.type === "appointment"
           ? await savePreclinicVitals(selectedRecord.id, payload)
-          : await savePreclinicPatientVitals(selectedRecord.patient, payload);
+          : await savePreclinicPatientVitals(selectedRecord.patient, payload, selectedDate);
 
       if (selectedSource.type === "appointment") {
         setAppointments((current) => current.map((appointment) => (appointment.id === updated.id ? updated : appointment)));
@@ -235,11 +225,9 @@ export function PreclinicCapture() {
             <Stethoscope size={20} aria-hidden="true" />
             <div>
               <strong>{selectedRecord?.patient_name || "Seleccione un paciente registrado"}</strong>
-              <span>
-                {selectedRecord
-                  ? `Paciente registrado #${selectedRecord.patient}${selectedRecord.patient_dni ? ` · DNI ${selectedRecord.patient_dni}` : ""}`
-                  : "Los signos se guardan en PatientVitals.patient"}
-              </span>
+              {selectedRecord ? (
+                <span>{`Paciente registrado #${selectedRecord.patient}${selectedRecord.patient_dni ? ` - DNI ${selectedRecord.patient_dni}` : ""}`}</span>
+              ) : null}
             </div>
             {selectedRecord ? (
               <Link className="secondary-action compact preclinic-patient-link" to={`/app/pacientes/${selectedRecord.patient}`}>
@@ -298,8 +286,6 @@ export function PreclinicCapture() {
               <small>Previo: {comparison?.weight_kg || "sin dato"}</small>
             </label>
           </div>
-
-          <p className="preclinic-note">Comparacion persistente desde: {formatDateTime(comparison?.recorded_at)}</p>
 
           <button className="primary-action compact" disabled={!selectedRecord || isSaving} type="submit">
             <Save size={18} aria-hidden="true" />

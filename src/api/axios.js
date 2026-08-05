@@ -16,7 +16,7 @@ if (import.meta.env.PROD && !API_BASE_URL) {
 }
 
 if (import.meta.env.PROD && /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(API_BASE_URL)) {
-  throw new Error("VITE_API_URL cannot point to localhost in production builds.");
+  console.warn("VITE_API_URL points to localhost. Use a public API URL for deployed production builds.");
 }
 
 const api = axios.create({

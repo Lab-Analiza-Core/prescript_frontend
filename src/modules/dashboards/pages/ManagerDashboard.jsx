@@ -13,14 +13,17 @@ export function ManagerDashboard() {
         <div className="metric-card">
           <span>Presentismo</span>
           <strong>88%</strong>
+          <small>Control de agenda</small>
         </div>
         <div className="metric-card">
           <span>Recetas emitidas</span>
           <strong>126</strong>
+          <small>Firma medica</small>
         </div>
         <div className="metric-card">
           <span>Pacientes activos</span>
           <strong>342</strong>
+          <small>Seguimiento vivo</small>
         </div>
       </div>
 

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { BadgeCheck, IdCard, LoaderCircle, Lock, Mail } from "lucide-react";
+import { BadgeCheck, IdCard, LoaderCircle, Mail } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
+import { PasswordInput } from "../components/PasswordInput";
 import { useAuth } from "../../../shared/context/useAuth";
 
 export function DoctorActivation() {
@@ -15,6 +16,10 @@ export function DoctorActivation() {
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [visiblePasswords, setVisiblePasswords] = useState({
+    password: false,
+    passwordConfirm: false,
+  });
 
   if (isAuthenticated) {
     return <Navigate to="/app/agenda" replace />;
@@ -23,6 +28,13 @@ export function DoctorActivation() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const togglePasswordVisibility = (fieldName) => {
+    setVisiblePasswords((current) => ({
+      ...current,
+      [fieldName]: !current[fieldName],
+    }));
   };
 
   const getErrorMessage = (error) => {
@@ -117,30 +129,26 @@ export function DoctorActivation() {
           <div className="auth-grid">
             <label>
               <span>Contrasena</span>
-              <div className="input-shell">
-                <Lock size={18} aria-hidden="true" />
-                <input
-                  autoComplete="new-password"
-                  name="password"
-                  onChange={handleChange}
-                  type="password"
-                  value={form.password}
-                />
-              </div>
+              <PasswordInput
+                autoComplete="new-password"
+                isVisible={visiblePasswords.password}
+                name="password"
+                onChange={handleChange}
+                onToggleVisibility={() => togglePasswordVisibility("password")}
+                value={form.password}
+              />
             </label>
 
             <label>
               <span>Confirmar</span>
-              <div className="input-shell">
-                <Lock size={18} aria-hidden="true" />
-                <input
-                  autoComplete="new-password"
-                  name="passwordConfirm"
-                  onChange={handleChange}
-                  type="password"
-                  value={form.passwordConfirm}
-                />
-              </div>
+              <PasswordInput
+                autoComplete="new-password"
+                isVisible={visiblePasswords.passwordConfirm}
+                name="passwordConfirm"
+                onChange={handleChange}
+                onToggleVisibility={() => togglePasswordVisibility("passwordConfirm")}
+                value={form.passwordConfirm}
+              />
             </label>
           </div>
 
