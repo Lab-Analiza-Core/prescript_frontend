@@ -105,15 +105,15 @@ a {
 
 .auth-screen-login {
   grid-template-rows: 1fr;
-  padding: clamp(18px, 4vw, 38px);
+  padding: clamp(14px, 3vw, 26px);
 }
 
 .auth-login-stage {
   grid-row: 1;
-  width: min(860px, 100%);
-  min-height: min(640px, calc(100dvh - 76px));
+  width: min(720px, 100%);
+  min-height: min(520px, calc(100dvh - 52px));
   display: grid;
-  grid-template-columns: minmax(180px, 0.72fr) minmax(340px, 420px);
+  grid-template-columns: minmax(150px, 0.58fr) minmax(320px, 380px);
   align-items: stretch;
   position: relative;
   z-index: 1;
@@ -130,8 +130,8 @@ a {
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 28px;
-  padding: clamp(28px, 6vw, 58px);
+  gap: 22px;
+  padding: clamp(22px, 4vw, 42px);
   color: #edf7f3;
   background:
     linear-gradient(135deg, rgba(9, 63, 67, 0.96), rgba(19, 43, 46, 0.92)),
@@ -267,8 +267,8 @@ a {
   border-radius: 0;
   box-shadow: none;
   display: grid;
-  align-content: center;
-  padding: clamp(28px, 5vw, 46px);
+  place-items: center;
+  padding: clamp(22px, 4vw, 34px);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.82), transparent 48%),
     var(--surface);
@@ -276,8 +276,8 @@ a {
 
 .login-auth-content {
   width: 100%;
-  max-width: 340px;
-  margin: clamp(14px, 4vw, 34px);
+  max-width: 310px;
+  margin: 0 auto;
   justify-self: center;
   display: grid;
   justify-items: center;
@@ -301,16 +301,16 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 22px;
+  gap: 10px;
+  margin-bottom: 16px;
   color: var(--primary-dark);
 }
 
 .login-brand-title .brand-mark {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-width: 2px;
-  font-size: 18px;
+  font-size: 16px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent),
     var(--primary);
@@ -318,7 +318,7 @@ a {
 
 .login-brand-title span {
   font-family: var(--display-font);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1;
 }
@@ -352,7 +352,7 @@ a {
 }
 
 .login-auth-panel .auth-heading {
-  margin: 0 0 26px;
+  margin: 0 0 20px;
   text-align: center;
 }
 
@@ -383,11 +383,11 @@ a {
 }
 
 .login-auth-panel .auth-heading h1 {
-  font-size: clamp(42px, 7vw, 58px);
+  font-size: clamp(36px, 4.4vw, 46px);
 }
 
 .login-action {
-  min-height: 48px;
+  min-height: 44px;
   margin-top: 2px;
 }
 
@@ -400,6 +400,7 @@ a {
 
 .login-auth-panel .login-form {
   width: 100%;
+  justify-items: stretch;
 }
 
 .login-auth-panel .login-form label {
@@ -1536,7 +1537,7 @@ dd {
 @media (max-width: 980px) {
   .auth-login-stage {
     grid-template-columns: 1fr;
-    width: min(520px, 100%);
+    width: min(440px, 100%);
     min-height: auto;
   }
 
@@ -1690,12 +1691,12 @@ dd {
   }
 
   .login-auth-content {
-    max-width: 360px;
-    margin: 8px auto;
+    max-width: 310px;
+    margin: 0 auto;
   }
 
   .login-auth-panel .auth-heading h1 {
-    font-size: 40px;
+    font-size: 36px;
   }
 
   .auth-panel {
@@ -1853,7 +1854,7 @@ dd {
   }
 
   .login-brand-title span {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .login-auth-panel .auth-heading h1 {
