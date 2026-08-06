@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { clearToken, getRefreshToken, getToken, setToken } from "./tokenStore";
+import { clearToken, getRefreshToken, getToken, setRefreshToken, setToken } from "./tokenStore";
 
 const normalizeApiBaseUrl = (value) => {
   if (!value) return "";
@@ -49,6 +49,9 @@ api.interceptors.response.use(
       try {
         const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refresh });
         setToken(response.data.access);
+        if (response.data.refresh) {
+          setRefreshToken(response.data.refresh);
+        }
         originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
         return api(originalRequest);
       } catch (refreshError) {

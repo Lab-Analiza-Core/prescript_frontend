@@ -4,16 +4,17 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { PasswordInput } from "../components/PasswordInput";
 import { useAuth } from "../../../shared/context/useAuth";
+import { useToast } from "../../../shared/context/useToast";
 
 export function Login() {
   const { isAuthenticated, login } = useAuth();
+  const { showToast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -30,9 +31,8 @@ export function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setErrorMessage("");
     if (!form.email.trim() || !form.password.trim()) {
-      setErrorMessage("Ingrese usuario y contrasena.");
+      showToast("Ingrese usuario y contrasena.", "warning");
       return;
     }
 
@@ -42,7 +42,7 @@ export function Login() {
       navigate(redirectTo, { replace: true });
     } catch (error) {
       const detail = error.response?.data?.detail;
-      setErrorMessage(detail || "No se pudo iniciar sesion. Revise sus credenciales.");
+      showToast(detail || "No se pudo iniciar sesion. Revise sus credenciales.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -97,15 +97,13 @@ export function Login() {
                 />
               </label>
 
-              {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
-
               <button className="primary-action login-action" disabled={isSubmitting} type="submit">
                 {isSubmitting ? <LoaderCircle className="spin-icon" size={18} aria-hidden="true" /> : <LogIn size={18} aria-hidden="true" />}
                 {isSubmitting ? "Ingresando" : "Entrar"}
               </button>
 
               <p className="auth-switch">
-                Primer ingreso medico. <Link to="/activar-acceso">Crear acceso</Link>
+                Primer ingreso. <Link to="/activar-acceso">Crear acceso</Link>
               </p>
             </form>
           </div>

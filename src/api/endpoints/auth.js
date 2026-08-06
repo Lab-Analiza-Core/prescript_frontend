@@ -18,7 +18,23 @@ export async function activateDoctorRequest({ identifier, email, password, passw
   return response.data;
 }
 
+export async function activateAccessRequest({ role, identifier, email, password, passwordConfirm }) {
+  const response = await api.post("/auth/access/activate", {
+    role,
+    identifier,
+    email,
+    password,
+    password_confirm: passwordConfirm,
+  });
+  return response.data;
+}
+
 export async function meRequest() {
   const response = await api.get("/auth/me");
+  return response.data;
+}
+
+export async function updateMeRequest(payload) {
+  const response = await api.patch("/auth/me", payload);
   return response.data;
 }
