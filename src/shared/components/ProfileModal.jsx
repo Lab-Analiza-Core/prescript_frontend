@@ -54,7 +54,6 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
   const { refreshUser } = useAuth();
   const { showToast } = useToast();
   const [visiblePasswords, setVisiblePasswords] = useState({
-    currentPassword: false,
     newPassword: false,
     passwordConfirm: false,
   });
@@ -62,7 +61,6 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
     phone: activeProfile.phone || "",
     email: activeProfile.public_email || activeProfile.email || user?.email || "",
     preferences: getPreferencesText(user?.doctorProfile?.preferences),
-    currentPassword: "",
     newPassword: "",
     passwordConfirm: "",
   });
@@ -82,9 +80,8 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
     setIsSaving(true);
 
     const passwordPayload =
-      form.currentPassword || form.newPassword || form.passwordConfirm
+      form.newPassword || form.passwordConfirm
         ? {
-            current_password: form.currentPassword,
             new_password: form.newPassword,
             password_confirm: form.passwordConfirm,
           }
@@ -108,7 +105,6 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
       await refreshUser();
       setForm((current) => ({
         ...current,
-        currentPassword: "",
         newPassword: "",
         passwordConfirm: "",
       }));
@@ -162,18 +158,6 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
       <div className="profile-form-section field-wide">
         <span>Contrasena</span>
       </div>
-
-      <label className="field-wide">
-        <span>Contrasena actual</span>
-        <PasswordInput
-          autoComplete="current-password"
-          isVisible={visiblePasswords.currentPassword}
-          name="currentPassword"
-          onChange={handleChange}
-          onToggleVisibility={() => togglePasswordVisibility("currentPassword")}
-          value={form.currentPassword}
-        />
-      </label>
 
       <label>
         <span>Nueva contrasena</span>

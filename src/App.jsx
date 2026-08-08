@@ -14,6 +14,7 @@ import { PreclinicCapture } from "./modules/preclinic/pages/PreclinicCapture";
 import { PrescriptionEditor } from "./modules/prescriptions/pages/PrescriptionEditor";
 import { MedicineCatalog } from "./modules/medicines/pages/MedicineCatalog";
 import { ManagerDashboard } from "./modules/dashboards/pages/ManagerDashboard";
+import { UserManagement } from "./modules/users/pages/UserManagement";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="recetas" element={<RoleRoute routeKey="recetas"><PrescriptionEditor /></RoleRoute>} />
             <Route path="medicamentos" element={<RoleRoute routeKey="medicamentos"><MedicineCatalog /></RoleRoute>} />
             <Route path="dashboard" element={<RoleRoute routeKey="dashboard"><ManagerDashboard /></RoleRoute>} />
+            <Route path="usuarios" element={<RoleRoute routeKey="usuarios"><UserManagement /></RoleRoute>} />
           </Route>
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>

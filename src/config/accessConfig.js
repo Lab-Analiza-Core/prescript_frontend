@@ -4,6 +4,7 @@ import {
   CalendarDays,
   FilePenLine,
   Pill,
+  UserCog,
   UsersRound,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ export const navigationItems = [
   { label: "Recetas", path: "/app/recetas", icon: FilePenLine, roles: ["doctor"] },
   { label: "Medicamentos", path: "/app/medicamentos", icon: Pill, roles: ["doctor"] },
   { label: "KPIs", path: "/app/dashboard", icon: BarChart3, roles: ["manager", "admin"] },
+  { label: "Usuarios", path: "/app/usuarios", icon: UserCog, roles: ["admin"] },
 ];
 
 export const routeAccess = {
@@ -38,10 +40,11 @@ export const routeAccess = {
   recetas: ["doctor"],
   medicamentos: ["doctor"],
   dashboard: ["manager", "admin"],
+  usuarios: ["admin"],
 };
 
 export const firstRouteByRole = {
-  admin: "/app/dashboard",
+  admin: "/app/usuarios",
   doctor: "/app/agenda",
   manager: "/app/dashboard",
   nurse: "/app/preclinica",

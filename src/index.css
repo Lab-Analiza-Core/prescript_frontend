@@ -1267,6 +1267,126 @@ dd {
   @apply col-span-full flex justify-end gap-2.5 border-t border-prescript-line bg-prescript-surface px-5 py-3.5;
 }
 
+.user-management-page {
+  @apply gap-4;
+}
+
+.user-control-panel {
+  @apply overflow-hidden rounded-prescript border border-prescript-line bg-prescript-surface shadow-[0_12px_30px_rgba(20,36,42,0.06)];
+}
+
+.user-control-header {
+  @apply flex items-center justify-between gap-4 border-b border-prescript-line px-5 py-4;
+}
+
+.user-control-header h2 {
+  @apply m-0 font-prescript-display text-[24px] leading-tight text-prescript-ink;
+}
+
+.user-control-header span {
+  @apply text-sm font-bold text-prescript-muted;
+}
+
+.user-control-actions {
+  @apply flex min-w-0 flex-wrap items-center justify-end gap-2.5;
+}
+
+.user-search {
+  @apply min-w-[260px] max-w-[360px];
+}
+
+.filter-active {
+  @apply border-prescript-primary/35 bg-prescript-primary/10 text-prescript-primary;
+}
+
+.filter-count {
+  @apply grid size-5 place-items-center rounded-full bg-prescript-primary text-xs font-black text-white;
+}
+
+.user-filters {
+  @apply grid items-end gap-3 border-b border-prescript-line bg-prescript-muted-surface/55 px-5 py-4;
+  grid-template-columns: repeat(2, minmax(180px, 260px)) auto;
+}
+
+.user-filters select {
+  @apply px-3 py-[11px];
+}
+
+.user-filter-buttons {
+  @apply flex justify-end gap-2;
+}
+
+.user-table {
+  @apply overflow-hidden;
+}
+
+.user-row {
+  @apply grid-cols-[minmax(220px,1.5fr)_minmax(150px,0.8fr)_minmax(100px,0.55fr)_minmax(90px,0.55fr)_132px];
+}
+
+.user-identity {
+  @apply flex min-w-0 items-center gap-3;
+}
+
+.user-identity div {
+  @apply grid min-w-0 gap-0.5;
+}
+
+.user-identity strong,
+.user-identity small {
+  @apply min-w-0 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+.user-identity small {
+  @apply text-xs font-[650] text-prescript-muted;
+}
+
+.user-avatar {
+  @apply grid size-10 flex-none place-items-center rounded-full bg-prescript-primary text-sm font-black text-prescript-surface;
+}
+
+.role-badge {
+  @apply inline-flex w-fit items-center gap-1.5 rounded-full bg-prescript-accent/10 px-2.5 py-1 text-xs font-extrabold text-prescript-accent;
+}
+
+.user-modal {
+  width: min(760px, 100%);
+  max-height: min(780px, calc(100dvh - 24px));
+}
+
+.user-modal-header {
+  @apply bg-prescript-muted-surface/50;
+}
+
+.user-form {
+  @apply max-h-[calc(100dvh-210px)] grid-cols-2;
+}
+
+.user-role-grid {
+  @apply grid gap-2.5;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.role-chip {
+  @apply flex min-h-[42px] cursor-pointer items-center gap-2 rounded-prescript border border-prescript-line bg-prescript-surface px-3 text-sm font-bold text-prescript-muted;
+}
+
+.role-chip input {
+  @apply size-4 w-4 accent-prescript-primary;
+}
+
+.role-chip.selected {
+  @apply border-prescript-primary/45 bg-prescript-primary/10 text-prescript-primary-dark;
+}
+
+.user-toggle {
+  @apply flex min-h-[42px] cursor-pointer items-center gap-2 rounded-prescript border border-prescript-line bg-prescript-surface px-3 text-sm font-bold text-prescript-muted;
+}
+
+.user-toggle input {
+  @apply size-4 w-4 accent-prescript-primary;
+}
+
 @media (max-width: 1180px) {
   .app-shell {
     @apply grid-cols-[270px_1fr];
@@ -1363,6 +1483,19 @@ dd {
 
   .page-header,
   .appointment-row {
+    @apply grid-cols-1;
+  }
+
+  .user-control-header {
+    @apply grid items-start;
+  }
+
+  .user-control-actions,
+  .user-search {
+    @apply w-full max-w-none;
+  }
+
+  .user-filters {
     @apply grid-cols-1;
   }
 
