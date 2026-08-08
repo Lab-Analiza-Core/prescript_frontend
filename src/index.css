@@ -412,6 +412,19 @@ label {
   @apply flex min-w-0 items-center gap-2.5 rounded-prescript border border-prescript-line bg-prescript-surface/85 px-3 text-prescript-muted;
 }
 
+.phone-input-group {
+  @apply grid min-w-0 gap-2;
+  grid-template-columns: 84px minmax(0, 1fr);
+}
+
+.phone-input-group > input[disabled] {
+  @apply cursor-not-allowed bg-prescript-muted-surface px-2 text-center text-sm font-extrabold text-prescript-muted;
+}
+
+.phone-input-group .input-shell {
+  @apply w-full;
+}
+
 .input-shell:focus-within,
 .search-shell:focus-within,
 .toolbar:focus-within {
@@ -1167,9 +1180,10 @@ dd {
 }
 
 .profile-modal {
-  @apply relative z-[1] overflow-hidden rounded-prescript border border-prescript-line shadow-[0_24px_70px_rgba(15,23,42,0.22)];
+  @apply relative z-[1] grid overflow-hidden rounded-prescript border border-prescript-line shadow-[0_24px_70px_rgba(15,23,42,0.22)];
   width: min(620px, 100%);
   max-height: min(720px, calc(100dvh - 24px));
+  grid-template-rows: auto auto minmax(0, 1fr);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.65), transparent 48%),
     var(--surface);
@@ -1211,7 +1225,7 @@ dd {
 }
 
 .modal-form {
-  @apply grid grid-cols-2 gap-4 overflow-auto p-5;
+  @apply grid min-h-0 grid-cols-2 gap-4 overflow-auto p-5;
 }
 
 .profile-form-section {
@@ -1265,6 +1279,10 @@ dd {
 
 .modal-actions {
   @apply col-span-full flex justify-end gap-2.5 border-t border-prescript-line bg-prescript-surface px-5 py-3.5;
+}
+
+.profile-modal .modal-actions {
+  @apply sticky bottom-0 -mx-5 -mb-5 mt-1;
 }
 
 .user-management-page {

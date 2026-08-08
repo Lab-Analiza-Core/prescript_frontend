@@ -4,6 +4,7 @@ import { LoaderCircle, Mail, MapPin, Phone, Save, Stethoscope, UserRound, X } fr
 import { updateMeRequest } from "../../api/endpoints/auth";
 import { updateDoctorProfile } from "../../api/endpoints/doctor";
 import { PasswordInput } from "../../modules/auth/components/PasswordInput";
+import { applyNumericMask, getCountryFieldFormat, isMaskComplete, stripPhoneCountryCode } from "../utils/fieldMasks";
 import { useToast } from "../context/useToast";
 import { useAuth } from "../context/useAuth";
 
@@ -65,10 +66,21 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
     passwordConfirm: "",
   });
   const [isSaving, setIsSaving] = useState(false);
+  const fieldFormat = getCountryFieldFormat(user?.country || activeProfile.country || "HN");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handlePhoneChange = (event) => {
+    setForm((current) => ({
+      ...current,
+      phone: applyNumericMask(
+        stripPhoneCountryCode(event.target.value, fieldFormat.phoneCode),
+        fieldFormat.phoneMask,
+      ),
+    }));
   };
 
   const togglePasswordVisibility = (field) => {
@@ -88,6 +100,10 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
         : {};
 
     try {
+      if (form.phone && !isMaskComplete(form.phone, fieldFormat.phoneMask)) {
+        throw new Error(`El telefono debe seguir el formato ${fieldFormat.phoneMask}.`);
+      }
+
       await updateMeRequest({
         phone: form.phone,
         email: form.email,
@@ -110,7 +126,7 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
       }));
       showToast("Perfil actualizado.", "success");
     } catch (error) {
-      showToast(getErrorMessage(error), "error");
+      showToast(error.response ? getErrorMessage(error) : error.message, "error");
     } finally {
       setIsSaving(false);
     }
@@ -134,10 +150,22 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
 
       <label>
         <span>Telefono</span>
-        <div className="input-shell">
-          <Phone size={17} aria-hidden="true" />
-          <input autoComplete="tel" name="phone" onChange={handleChange} value={form.phone} />
+        <div className="phone-input-group">
+          <input aria-label="Codigo de pais" disabled value={fieldFormat.phoneCode} />
+          <div className="input-shell">
+            <Phone size={17} aria-hidden="true" />
+            <input
+              autoComplete="tel"
+              inputMode="numeric"
+              maxLength={fieldFormat.phoneMask.length}
+              name="phone"
+              onChange={handlePhoneChange}
+              placeholder={fieldFormat.phoneMask}
+              value={form.phone}
+            />
+          </div>
         </div>
+        <small>Formato: {fieldFormat.phoneMask}</small>
       </label>
 
       <label className="field-wide">

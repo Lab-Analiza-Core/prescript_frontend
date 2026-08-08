@@ -2,7 +2,16 @@ import { Save, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
+import {
+  applyNumericMask,
+  getCountryFieldFormat,
+  isMaskComplete,
+  maskPlaceholder,
+  stripPhoneCountryCode,
+} from "../../../shared/utils/fieldMasks";
+
 const emptyForm = {
+  doctor: "",
   first_name: "",
   last_name: "",
   dni: "",
@@ -14,6 +23,7 @@ const emptyForm = {
 };
 
 const getInitialForm = (patient) => ({
+  doctor: patient?.doctor || "",
   first_name: patient?.first_name || "",
   last_name: patient?.last_name || "",
   dni: patient?.dni || "",
@@ -24,12 +34,27 @@ const getInitialForm = (patient) => ({
   commercial_notes: patient?.commercial_notes || "",
 });
 
-export function PatientModal({ isOpen, mode, onClose, onSubmit, patient }) {
+const getErrorMessage = (error) => {
+  const detail = error.response?.data;
+  if (!detail) return "No se pudo guardar el paciente. Revise los datos.";
+  if (typeof detail === "string") return detail;
+  if (typeof detail.detail === "string") return detail.detail;
+
+  const firstKey = Object.keys(detail)[0];
+  const firstValue = detail[firstKey];
+  if (Array.isArray(firstValue)) return `${firstKey}: ${firstValue[0]}`;
+  if (typeof firstValue === "string") return `${firstKey}: ${firstValue}`;
+  return "No se pudo guardar el paciente. Revise los datos.";
+};
+
+export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode, onClose, onSubmit, patient, requiresDoctor = false }) {
   const [form, setForm] = useState(() => (isOpen ? getInitialForm(patient) : emptyForm));
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const title = useMemo(() => (mode === "edit" ? "Modificar paciente" : "Nuevo paciente"), [mode]);
+  const fieldFormat = useMemo(() => getCountryFieldFormat(country), [country]);
+  const dniPlaceholder = useMemo(() => maskPlaceholder(fieldFormat.dniMask), [fieldFormat.dniMask]);
 
   if (!isOpen) return null;
 
@@ -38,15 +63,45 @@ export function PatientModal({ isOpen, mode, onClose, onSubmit, patient }) {
     setForm((current) => ({ ...current, [name]: value }));
   };
 
-  const buildPayload = () => ({
-    ...form,
-    dni: form.dni.trim() || null,
-    phone: form.phone.trim() || null,
-    email: form.email.trim() || null,
-    birth_date: form.birth_date || null,
-    sex: form.sex || null,
-    commercial_notes: form.commercial_notes.trim() || null,
-  });
+  const handleDniChange = (event) => {
+    setForm((current) => ({
+      ...current,
+      dni: applyNumericMask(event.target.value, fieldFormat.dniMask),
+    }));
+  };
+
+  const handlePhoneChange = (event) => {
+    setForm((current) => ({
+      ...current,
+      phone: applyNumericMask(
+        stripPhoneCountryCode(event.target.value, fieldFormat.phoneCode),
+        fieldFormat.phoneMask,
+      ),
+    }));
+  };
+
+  const buildPayload = () => {
+    if (form.dni && !isMaskComplete(form.dni, fieldFormat.dniMask)) {
+      throw new Error(`El DNI debe seguir el formato ${fieldFormat.dniMask}.`);
+    }
+    if (form.phone && !isMaskComplete(form.phone, fieldFormat.phoneMask)) {
+      throw new Error(`El telefono debe seguir el formato ${fieldFormat.phoneMask}.`);
+    }
+
+    const payload = {
+      ...form,
+      dni: form.dni.trim() || null,
+      phone: form.phone.trim() || null,
+      email: form.email.trim() || null,
+      birth_date: form.birth_date || null,
+      sex: form.sex || null,
+      commercial_notes: form.commercial_notes.trim() || null,
+    };
+    if (!requiresDoctor || !payload.doctor) {
+      delete payload.doctor;
+    }
+    return payload;
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -55,12 +110,7 @@ export function PatientModal({ isOpen, mode, onClose, onSubmit, patient }) {
     try {
       await onSubmit(buildPayload());
     } catch (error) {
-      const detail = error.response?.data;
-      setErrorMessage(
-        typeof detail === "string"
-          ? detail
-          : detail?.detail || "No se pudo guardar el paciente. Revise los datos.",
-      );
+      setErrorMessage(error.response ? getErrorMessage(error) : error.message);
     } finally {
       setIsSaving(false);
     }
@@ -87,17 +137,49 @@ export function PatientModal({ isOpen, mode, onClose, onSubmit, patient }) {
               <span>Primer nombre</span>
               <input name="first_name" onChange={handleChange} required value={form.first_name} />
             </label>
+            {requiresDoctor ? (
+              <label>
+                <span>Doctor responsable</span>
+                <select name="doctor" onChange={handleChange} required value={form.doctor}>
+                  <option value="">Seleccione doctor</option>
+                  {doctorOptions.map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.full_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             <label>
               <span>Apellido</span>
               <input name="last_name" onChange={handleChange} required value={form.last_name} />
             </label>
             <label>
               <span>DNI</span>
-              <input name="dni" onChange={handleChange} value={form.dni} />
+              <input
+                inputMode="numeric"
+                maxLength={fieldFormat.dniMask?.length || 25}
+                name="dni"
+                onChange={handleDniChange}
+                placeholder={dniPlaceholder || "DNI"}
+                value={form.dni}
+              />
+              {fieldFormat.dniMask ? <small>Formato: {fieldFormat.dniMask}</small> : null}
             </label>
             <label>
               <span>Telefono</span>
-              <input name="phone" onChange={handleChange} value={form.phone} />
+              <div className="phone-input-group">
+                <input aria-label="Codigo de pais" disabled value={fieldFormat.phoneCode} />
+                <input
+                  inputMode="numeric"
+                  maxLength={fieldFormat.phoneMask.length}
+                  name="phone"
+                  onChange={handlePhoneChange}
+                  placeholder={fieldFormat.phoneMask}
+                  value={form.phone}
+                />
+              </div>
+              <small>Formato: {fieldFormat.phoneMask}</small>
             </label>
             <label>
               <span>Correo</span>

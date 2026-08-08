@@ -2,7 +2,9 @@ import { Edit3, Plus, Search, UserX } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { createPatient, deactivatePatient, listPatients, updatePatient } from "../../../api/endpoints/patients";
+import { listDoctors } from "../../../api/endpoints/doctor";
 import { PageHeader } from "../../../shared/components/PageHeader";
+import { useAuth } from "../../../shared/context/useAuth";
 import { DeactivatePatientDialog } from "../components/DeactivatePatientDialog";
 import { PatientModal } from "../components/PatientModal";
 
@@ -16,13 +18,16 @@ const formatDate = (value) => {
 };
 
 export function PatientList() {
+  const { user } = useAuth();
   const [patients, setPatients] = useState([]);
+  const [doctorOptions, setDoctorOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [modalState, setModalState] = useState({ isOpen: false, mode: "create", patient: null });
   const [confirmState, setConfirmState] = useState({ isOpen: false, patient: null });
   const [isDeactivating, setIsDeactivating] = useState(false);
+  const requiresDoctor = user?.role !== "doctor";
 
   useEffect(() => {
     let isMounted = true;
@@ -47,6 +52,27 @@ export function PatientList() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!requiresDoctor) return undefined;
+
+    let isMounted = true;
+    listDoctors()
+      .then((payload) => {
+        if (isMounted) {
+          setDoctorOptions(Array.isArray(payload) ? payload : payload.results || []);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setErrorMessage("No se pudo cargar la lista de doctores.");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [requiresDoctor]);
 
   const filteredPatients = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -171,10 +197,13 @@ export function PatientList() {
       {modalState.isOpen ? (
         <PatientModal
           isOpen={modalState.isOpen}
+          country={user?.country || "HN"}
+          doctorOptions={doctorOptions}
           mode={modalState.mode}
           onClose={closePatientModal}
           onSubmit={handleSavePatient}
           patient={modalState.patient}
+          requiresDoctor={requiresDoctor}
         />
       ) : null}
 
