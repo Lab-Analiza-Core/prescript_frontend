@@ -29,6 +29,14 @@ export async function activateAccessRequest({ role, identifier, email, password,
   return response.data;
 }
 
+export async function validateAccessIdentifierRequest({ role, identifier }) {
+  const response = await api.post("/auth/access/validate", {
+    role,
+    identifier,
+  });
+  return response.data;
+}
+
 export async function meRequest() {
   const response = await api.get("/auth/me");
   return response.data;

@@ -230,6 +230,7 @@ export function ProfileModal({ isOpen, onClose, user }) {
   const activeProfile = getActiveProfile(user);
   const isDoctor = Boolean(user?.doctorProfile);
   const roleLabel = ROLE_LABELS[user?.role] || user?.roleLabel || "Usuario";
+  const displayName = user?.displayName || user?.name || activeProfile.display_name || activeProfile.full_name || "Usuario";
 
   return (
     <div className="modal-layer" role="presentation">
@@ -242,7 +243,7 @@ export function ProfileModal({ isOpen, onClose, user }) {
           </div>
           <div>
             <span className="eyebrow">Perfil de usuario</span>
-            <h2 id="profile-modal-title">{user?.name || activeProfile.full_name || "Usuario"}</h2>
+            <h2 id="profile-modal-title">{displayName}</h2>
           </div>
           <button className="icon-button" onClick={onClose} type="button" aria-label="Cerrar">
             <X size={19} aria-hidden="true" />

@@ -8,12 +8,14 @@ import { AuthContext } from "./authContextObject";
 
 const normalizeUser = (payload) => {
   const activeProfile = payload.doctor_profile || payload.secretary_profile || payload.nurse_profile || {};
+  const displayName = payload.display_name || activeProfile.display_name || payload.full_name || payload.name || activeProfile.full_name || payload.username;
 
   return {
     id: payload.id,
     username: payload.email || payload.public_email || payload.full_name,
     email: payload.email,
-    name: payload.full_name || payload.name || activeProfile.full_name || payload.username,
+    name: displayName,
+    displayName,
     role: normalizeRole(payload.role),
     roleLabel: payload.role || "DOCTOR",
     country: activeProfile.country || "HN",

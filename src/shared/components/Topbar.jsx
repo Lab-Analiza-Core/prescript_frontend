@@ -25,7 +25,7 @@ export function Topbar({ onOpenProfile, onToggleSidebar }) {
       <button className="profile-trigger" onClick={onOpenProfile} type="button" aria-label="Abrir perfil de usuario">
         <UserRound size={18} aria-hidden="true" />
         <span className="user-text">
-          <strong>{user?.name}</strong>
+          <strong>{user?.displayName || user?.name}</strong>
           <small>{user?.roleLabel || user?.role}</small>
         </span>
       </button>

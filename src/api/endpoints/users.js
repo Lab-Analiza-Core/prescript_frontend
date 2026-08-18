@@ -26,7 +26,7 @@ export async function deactivateUser(userId) {
   return response.data;
 }
 
-export async function resetUserPassword(userId, password) {
-  const response = await api.post(`/admin/users/${userId}/reset-password`, { password });
+export async function resetUserPassword(userId) {
+  const response = await api.post(`/admin/users/${userId}/reset-password`);
   return response.data;
 }

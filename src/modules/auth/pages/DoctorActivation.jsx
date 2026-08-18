@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { BadgeCheck, ChevronLeft, ChevronRight, IdCard, LoaderCircle, Mail, Stethoscope, UserCheck, UserRoundCog } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
+import { validateAccessIdentifierRequest } from "../../../api/endpoints/auth";
 import { PasswordInput } from "../components/PasswordInput";
 import { useAuth } from "../../../shared/context/useAuth";
 import { useToast } from "../../../shared/context/useToast";
@@ -42,6 +43,8 @@ export function DoctorActivation() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidatingIdentifier, setIsValidatingIdentifier] = useState(false);
+  const [identifierError, setIdentifierError] = useState("");
   const [visiblePasswords, setVisiblePasswords] = useState({
     password: false,
     passwordConfirm: false,
@@ -59,10 +62,14 @@ export function DoctorActivation() {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+    if (name === "identifier") {
+      setIdentifierError("");
+    }
   };
 
   const selectRole = (role) => {
     setForm((current) => ({ ...current, role }));
+    setIdentifierError("");
   };
 
   const togglePasswordVisibility = (fieldName) => {
@@ -89,11 +96,32 @@ export function DoctorActivation() {
     return findMessage(data) || "No se pudo crear el acceso. Revise los datos ingresados.";
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step === 2 && !form.identifier.trim()) {
-      showToast("Ingrese el identificador registrado en Interactive Core.", "warning");
+      const message = "Ingrese el identificador registrado en Interactive Core.";
+      setIdentifierError(message);
+      showToast(message, "warning");
       return;
     }
+
+    if (step === 2) {
+      setIsValidatingIdentifier(true);
+      setIdentifierError("");
+      try {
+        await validateAccessIdentifierRequest({
+          role: form.role,
+          identifier: form.identifier.trim(),
+        });
+      } catch (error) {
+        const message = getErrorMessage(error);
+        setIdentifierError(message);
+        showToast(message, "error");
+        return;
+      } finally {
+        setIsValidatingIdentifier(false);
+      }
+    }
+
     setStep((current) => Math.min(current + 1, 3));
   };
 
@@ -172,16 +200,24 @@ export function DoctorActivation() {
           {step === 2 ? (
             <label>
               <span>{selectedRole.label}: identificador de Interactive Core</span>
-              <div className="input-shell">
+              <div className={identifierError ? "input-shell input-shell-error" : "input-shell"}>
                 <IdCard size={18} aria-hidden="true" />
                 <input
+                  aria-describedby={identifierError ? "identifier-error" : undefined}
+                  aria-invalid={Boolean(identifierError)}
                   autoComplete="username"
                   name="identifier"
                   onChange={handleChange}
                   value={form.identifier}
                 />
               </div>
-              <small>{selectedRole.hint}</small>
+              {identifierError ? (
+                <small className="field-error" id="identifier-error">
+                  {identifierError}
+                </small>
+              ) : (
+                <small>{selectedRole.hint}</small>
+              )}
             </label>
           ) : null}
 
@@ -239,9 +275,10 @@ export function DoctorActivation() {
             ) : null}
 
             {step < 3 ? (
-              <button className="primary-action compact wizard-next" onClick={goNext} type="button">
-                Siguiente
-                <ChevronRight size={18} aria-hidden="true" />
+              <button className="primary-action compact wizard-next" disabled={isValidatingIdentifier} onClick={goNext} type="button">
+                {isValidatingIdentifier ? <LoaderCircle className="spin-icon" size={18} aria-hidden="true" /> : null}
+                {isValidatingIdentifier ? "Validando" : "Siguiente"}
+                {!isValidatingIdentifier ? <ChevronRight size={18} aria-hidden="true" /> : null}
               </button>
             ) : (
               <button className="primary-action compact wizard-next" disabled={isSubmitting} type="submit">
