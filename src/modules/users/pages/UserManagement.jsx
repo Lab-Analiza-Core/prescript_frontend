@@ -8,6 +8,16 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { UserModal } from "../components/UserModal";
 import { ROLE_OPTIONS, roleLabel } from "../userConstants";
 
+const getLoadErrorMessage = (error) => {
+  if (error.response?.status === 403) {
+    return "Tu acceso de administrador no esta vigente en InteractiveCore.";
+  }
+  if (error.response?.status === 503) {
+    return "InteractiveCore no responde; no se pudo verificar el acceso. Intenta de nuevo en un momento.";
+  }
+  return "No se pudo cargar el modulo de usuarios.";
+};
+
 const getInitials = (user) => {
   const source = user.full_name || user.email || user.username || "U";
   return source
@@ -39,8 +49,8 @@ export function UserManagement() {
     try {
       const payload = await listUsers(nextFilters);
       setUsers(Array.isArray(payload) ? payload : payload.results || []);
-    } catch {
-      showToast("No se pudo cargar el modulo de usuarios.", "error");
+    } catch (error) {
+      showToast(getLoadErrorMessage(error), "error");
     } finally {
       setIsLoading(false);
     }
@@ -54,9 +64,9 @@ export function UserManagement() {
           setUsers(Array.isArray(payload) ? payload : payload.results || []);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (isMounted) {
-          showToast("No se pudo cargar el modulo de usuarios.", "error");
+          showToast(getLoadErrorMessage(error), "error");
         }
       })
       .finally(() => {
