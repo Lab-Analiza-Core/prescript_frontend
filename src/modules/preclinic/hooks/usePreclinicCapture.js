@@ -12,7 +12,7 @@ import {
   toMonthAnchor,
   today,
 } from "../../../shared/utils/calendarUtils";
-import { buildVitalsForm, emptyVitals, numberOrNull } from "../preclinicUtils";
+import { buildVitalsForm, emptyVitals, medicalListFromText, numberOrNull } from "../preclinicUtils";
 
 export function usePreclinicCapture() {
   const todayDate = today();
@@ -136,6 +136,12 @@ export function usePreclinicCapture() {
     setErrorMessage("");
     try {
       const payload = {
+        medical_profile: {
+          allergies: medicalListFromText(form.allergies),
+          chronic_conditions: medicalListFromText(form.chronic_conditions),
+          blood_type: form.blood_type || null,
+          clinical_notes: form.clinical_notes.trim() || null,
+        },
         blood_pressure_systolic: numberOrNull(form.blood_pressure_systolic),
         blood_pressure_diastolic: numberOrNull(form.blood_pressure_diastolic),
         oxygen_saturation: numberOrNull(form.oxygen_saturation),
@@ -154,10 +160,10 @@ export function usePreclinicCapture() {
         setPatients((current) => current.map((patient) => (patient.id === updated.id ? updated : patient)));
       }
       setForm(buildVitalsForm(updated));
-      setMessage("Signos vitales guardados en el expediente del paciente.");
+      setMessage("Preclinica y expediente medico guardados correctamente.");
       setIsVitalsModalOpen(false);
     } catch (error) {
-      setErrorMessage(error?.response?.data?.date || "No se pudieron guardar los signos vitales.");
+      setErrorMessage(error?.response?.data?.date || error?.response?.data?.detail || "No se pudo guardar la preclinica.");
     } finally {
       setIsSaving(false);
     }

@@ -67,7 +67,7 @@ export function UserModal({ canSelectGlobal = false, countries = [], isSaving, m
   return (
     <div className="modal-layer" role="presentation">
       <button className="modal-backdrop" onClick={onClose} type="button" aria-label="Cerrar gestion de usuario" />
-      <section className="profile-modal user-modal" aria-labelledby="user-modal-title" role="dialog" aria-modal="true">
+      <section className="form-modal profile-modal user-modal" aria-labelledby="user-modal-title" role="dialog" aria-modal="true">
         <header className="modal-header user-modal-header">
           <div className="doctor-avatar">
             <UserRound size={22} aria-hidden="true" />

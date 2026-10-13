@@ -78,19 +78,10 @@ export function GlobalSearch({ country, countryCode }) {
     const handlePointerDown = (event) => {
       if (!rootRef.current?.contains(event.target)) setIsOpen(false);
     };
-    const handleShortcut = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        inputRef.current?.focus();
-        setIsOpen(true);
-      }
-    };
 
     document.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("keydown", handleShortcut);
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("keydown", handleShortcut);
     };
   }, []);
 
@@ -183,7 +174,7 @@ export function GlobalSearch({ country, countryCode }) {
           type="search"
           value={query}
         />
-        {isLoading ? <LoaderCircle className="search-loader" size={17} aria-label="Buscando" /> : <kbd>Ctrl K</kbd>}
+        {isLoading ? <LoaderCircle className="search-loader" size={17} aria-label="Buscando" /> : null}
       </div>
 
       {isOpen ? (

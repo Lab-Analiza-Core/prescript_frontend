@@ -124,7 +124,7 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
     <div className="modal-layer patient-modal-layer" role="presentation">
       <button className="modal-backdrop" onClick={onClose} type="button" aria-label="Cerrar paciente" />
 
-      <section className="profile-modal patient-modal" aria-labelledby="patient-modal-title" role="dialog" aria-modal="true">
+      <section className="form-modal profile-modal patient-modal" aria-labelledby="patient-modal-title" role="dialog" aria-modal="true">
         <header className="modal-header">
           <div>
             <span className="eyebrow">Pacientes</span>

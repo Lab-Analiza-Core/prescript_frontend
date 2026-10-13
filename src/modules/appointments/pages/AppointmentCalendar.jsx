@@ -1,12 +1,9 @@
 import {
-  CalendarCheck,
   CalendarClock,
   CalendarPlus,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  MessageCircle,
-  RotateCcw,
+  CircleAlert,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
@@ -19,7 +16,8 @@ import {
   WEEKDAYS,
 } from "../../../shared/utils/calendarUtils";
 import { AppointmentModal } from "../components/AppointmentModal";
-import { toTime } from "../appointmentUtils";
+import { AppointmentRow } from "../components/AppointmentRow";
+import { AppointmentStatusDialog } from "../components/AppointmentStatusDialog";
 import { useAgenda } from "../hooks/useAgenda";
 import { getCountryLocale } from "../../../shared/utils/countryUtils";
 
@@ -32,7 +30,9 @@ export function AppointmentCalendar() {
     appointmentsByDate,
     calendarDays,
     closeAppointmentModal,
+    closeAppointmentStatusDialog,
     confirmAppointment,
+    confirmAppointmentStatus,
     doctors,
     eligiblePatients,
     errorMessage,
@@ -45,18 +45,22 @@ export function AppointmentCalendar() {
     isLoading,
     isSaving,
     isSecretary,
+    isUpdatingAppointmentStatus,
     message,
     metrics,
     minAppointmentTime,
     modalErrorMessage,
+    pendingClosureAppointments,
     saveAppointment,
     selectAppointment,
     selectDate,
     selectedAppointment,
+    appointmentAction,
     selectedAppointments,
     selectedDate,
     sendReminder,
     startNewAppointment,
+    requestAppointmentStatus,
     statusLabels: appointmentStatusLabels,
     statusTone: appointmentStatusTone,
     visibleMonth,
@@ -84,19 +88,58 @@ export function AppointmentCalendar() {
           <small>{parseDateKey(selectedDate).toLocaleDateString(locale)}</small>
         </div>
         <div className="metric-card">
-          <span>Confirmadas</span>
-          <strong>{metrics.confirmed}</strong>
-          <small>Estado activo</small>
+          <span>Por atender</span>
+          <strong>{metrics.active}</strong>
+          <small>Horario vigente</small>
         </div>
         <div className="metric-card">
-          <span>Reprogramadas</span>
-          <strong>{metrics.rescheduled}</strong>
-          <small>Cambios del dia</small>
+          <span>Pendientes de cierre</span>
+          <strong>{metrics.pending}</strong>
+          <small>Requieren una decisión</small>
+        </div>
+        <div className="metric-card">
+          <span>Canceladas</span>
+          <strong>{metrics.cancelled}</strong>
+          <small>Horario liberado</small>
         </div>
       </div>
 
       {errorMessage ? <p className="form-error">{errorMessage}</p> : null}
       {message ? <p className="form-success">{message}</p> : null}
+
+      {pendingClosureAppointments.length ? (
+        <section className="list-panel pending-closure-panel" aria-label="Citas pendientes de cierre">
+          <header className="pending-closure-header">
+            <span className="pending-closure-icon">
+              <CircleAlert size={21} aria-hidden="true" />
+            </span>
+            <div>
+              <span className="eyebrow">Acción requerida</span>
+              <h2>Pendientes de cierre</h2>
+              <p>El horario ya terminó. Registra el resultado o crea una nueva cita.</p>
+            </div>
+            <strong>{pendingClosureAppointments.length}</strong>
+          </header>
+          <div className="pending-closure-list">
+            {pendingClosureAppointments.map((appointment) => (
+              <AppointmentRow
+                appointment={appointment}
+                key={appointment.id}
+                locale={locale}
+                onConfirm={confirmAppointment}
+                onMarkAttended={(selected) => requestAppointmentStatus(selected, "attended")}
+                onMarkNoShow={(selected) => requestAppointmentStatus(selected, "no_show")}
+                onRemind={sendReminder}
+                onRequestCancellation={(selected) => requestAppointmentStatus(selected, "cancelled")}
+                onReschedule={selectAppointment}
+                showDate
+                statusLabels={appointmentStatusLabels}
+                statusTone={appointmentStatusTone}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <div className="appointment-workspace">
         <section className="list-panel appointment-calendar-panel" aria-label="Calendario de citas">
@@ -163,30 +206,19 @@ export function AppointmentCalendar() {
           {!isLoading && selectedAppointments.length === 0 ? <div className="empty-state">Sin citas para esta fecha</div> : null}
           {!isLoading &&
             selectedAppointments.map((appointment) => (
-              <article className="appointment-row" key={appointment.id}>
-                <button className="time-pill" onClick={() => selectAppointment(appointment)} type="button">
-                  <Clock size={16} aria-hidden="true" />
-                  {toTime(appointment.scheduled_at, locale)}
-                </button>
-                <div>
-                  <strong>{appointment.patient_name}</strong>
-                  <span>{appointment.reason || appointment.doctor_name}</span>
-                </div>
-                <div className="appointment-actions">
-                  <span className={`status-badge ${appointmentStatusTone[appointment.status] || ""}`}>
-                    {appointmentStatusLabels[appointment.status] || appointment.status}
-                  </span>
-                  <button aria-label="Confirmar cita" className="icon-button" onClick={() => confirmAppointment(appointment)} title="Confirmar cita" type="button">
-                    <CalendarCheck size={17} aria-hidden="true" />
-                  </button>
-                  <button aria-label="Recordatorio WhatsApp" className="icon-button" onClick={() => sendReminder(appointment)} title="Recordatorio WhatsApp" type="button">
-                    <MessageCircle size={17} aria-hidden="true" />
-                  </button>
-                  <button aria-label="Reagendar cita" className="icon-button" onClick={() => selectAppointment(appointment)} title="Reagendar cita" type="button">
-                    <RotateCcw size={17} aria-hidden="true" />
-                  </button>
-                </div>
-              </article>
+              <AppointmentRow
+                appointment={appointment}
+                key={appointment.id}
+                locale={locale}
+                onConfirm={confirmAppointment}
+                onMarkAttended={(selected) => requestAppointmentStatus(selected, "attended")}
+                onMarkNoShow={(selected) => requestAppointmentStatus(selected, "no_show")}
+                onRemind={sendReminder}
+                onRequestCancellation={(selected) => requestAppointmentStatus(selected, "cancelled")}
+                onReschedule={selectAppointment}
+                statusLabels={appointmentStatusLabels}
+                statusTone={appointmentStatusTone}
+              />
             ))}
         </section>
       </div>
@@ -204,11 +236,20 @@ export function AppointmentCalendar() {
           modalErrorMessage={modalErrorMessage}
           onChange={handleChange}
           onClose={closeAppointmentModal}
+          onRequestCancellation={(appointment) => requestAppointmentStatus(appointment, "cancelled")}
           onSubmit={saveAppointment}
           selectedAppointment={selectedAppointment}
           todayDate={today()}
         />
       ) : null}
+
+      <AppointmentStatusDialog
+        action={appointmentAction}
+        isProcessing={isUpdatingAppointmentStatus}
+        locale={locale}
+        onClose={closeAppointmentStatusDialog}
+        onConfirm={confirmAppointmentStatus}
+      />
     </div>
   );
 }

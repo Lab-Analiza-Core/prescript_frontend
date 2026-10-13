@@ -646,7 +646,6 @@ textarea:focus {
   @apply text-prescript-primary;
 }
 
-.global-search .search-shell kbd,
 .search-results-footer kbd {
   @apply rounded border border-prescript-line-strong/60 bg-prescript-muted-surface/70 px-1.5 py-0.5 font-sans text-[10px] font-extrabold text-prescript-muted shadow-[0_1px_0_rgba(20,36,42,0.08)];
 }
@@ -933,7 +932,7 @@ textarea:focus {
 }
 
 .appointment-metrics {
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
 }
 
 .appointment-workspace {
@@ -1014,19 +1013,71 @@ textarea:focus {
 }
 
 .appointment-row {
-  @apply grid-cols-[96px_1fr_auto];
+  @apply grid-cols-[86px_minmax(150px,1fr)_minmax(300px,auto)];
 }
 
-.appointment-row .time-pill {
-  @apply cursor-pointer border-0 bg-transparent;
+.appointment-row.is-closed {
+  @apply bg-prescript-muted-surface/35;
+}
+
+.appointment-row.is-closed > :not(.appointment-actions) {
+  @apply opacity-60;
+}
+
+.appointment-row.is-pending-closure {
+  @apply bg-prescript-warning/5 shadow-[inset_3px_0_0_rgba(184,127,34,0.72)];
+}
+
+.appointment-row-copy small {
+  @apply text-[11px] font-bold text-prescript-muted;
 }
 
 .appointment-actions {
-  @apply inline-flex items-center justify-end gap-2;
+  @apply grid justify-items-end gap-2;
 }
 
 .appointment-actions .status-badge {
   @apply min-w-[104px] text-center;
+}
+
+.appointment-action-controls {
+  @apply flex flex-wrap justify-end gap-1.5;
+}
+
+.appointment-action-button {
+  @apply inline-flex min-h-8 items-center justify-center gap-1.5 rounded-[7px] border border-prescript-line bg-prescript-surface px-2.5 text-[11px] font-extrabold text-prescript-muted transition;
+}
+
+.appointment-action-button:hover,
+.appointment-action-button:focus-visible {
+  @apply border-prescript-primary/35 bg-prescript-primary/10 text-prescript-primary-dark outline-none;
+}
+
+.appointment-action-button.is-danger {
+  @apply border-prescript-danger/20 text-prescript-danger;
+}
+
+.appointment-action-button.is-danger:hover,
+.appointment-action-button.is-danger:focus-visible {
+  @apply border-prescript-danger/35 bg-prescript-danger/10 text-prescript-danger;
+}
+
+.appointment-action-button.is-success {
+  @apply border-prescript-primary/25 text-prescript-primary-dark;
+}
+
+.appointment-action-button.is-success:hover,
+.appointment-action-button.is-success:focus-visible {
+  @apply border-prescript-primary/45 bg-prescript-primary/10 text-prescript-primary-dark;
+}
+
+.appointment-action-button.is-reschedule {
+  @apply border-prescript-copper/25 text-prescript-copper;
+}
+
+.appointment-action-button.is-reschedule:hover,
+.appointment-action-button.is-reschedule:focus-visible {
+  @apply border-prescript-copper/45 bg-prescript-copper/10 text-prescript-copper;
 }
 
 .status-badge.confirmed {
@@ -1045,21 +1096,195 @@ textarea:focus {
   @apply bg-prescript-accent/10 text-prescript-accent;
 }
 
+.status-badge.pending {
+  @apply min-w-[132px] bg-prescript-warning/15 text-prescript-warning;
+}
+
+.pending-closure-panel {
+  @apply border border-prescript-warning/25 bg-prescript-surface;
+}
+
+.pending-closure-header {
+  @apply grid items-center gap-3 border-b border-prescript-warning/20 bg-prescript-warning/5 px-5 py-4;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.pending-closure-icon {
+  @apply grid size-11 place-items-center rounded-[10px] bg-prescript-warning/15 text-prescript-warning;
+}
+
+.pending-closure-header > div {
+  @apply min-w-0;
+}
+
+.pending-closure-header h2 {
+  @apply m-0 font-prescript-display text-[23px] leading-tight text-prescript-ink;
+}
+
+.pending-closure-header p {
+  @apply mb-0 mt-1 text-xs font-semibold leading-relaxed text-prescript-muted;
+}
+
+.pending-closure-header > strong {
+  @apply grid size-10 place-items-center rounded-full bg-prescript-warning text-lg font-black text-white shadow-[0_7px_16px_rgba(184,127,34,0.2)];
+}
+
+.pending-closure-list {
+  @apply max-h-[340px] overflow-auto;
+}
+
 .appointment-modal {
   @apply relative z-[1] grid overflow-hidden rounded-prescript border border-prescript-line bg-prescript-surface shadow-[0_24px_70px_rgba(15,23,42,0.22)];
-  width: min(680px, 100%);
-  max-height: min(720px, calc(100dvh - 24px));
+  width: min(780px, 100%);
+  max-height: min(820px, calc(100dvh - 24px));
   grid-template-rows: auto minmax(0, 1fr);
   animation: modal-enter 180ms ease both;
 }
 
 .appointment-modal-form {
-  @apply min-h-0 overflow-auto;
+  @apply min-h-0 overflow-auto bg-prescript-paper/35;
 }
 
-.appointment-modal-form input,
-.appointment-modal-form select {
-  @apply px-3 py-[11px];
+.appointment-modal .modal-header p {
+  @apply mb-0 mt-1 text-sm text-prescript-muted;
+}
+
+.appointment-form-intro {
+  @apply flex items-center gap-3 rounded-[10px] border border-prescript-primary/20 bg-prescript-primary/10 px-4 py-3.5;
+}
+
+.appointment-form-intro.is-rescheduling {
+  @apply border-prescript-copper/25 bg-prescript-copper/10;
+}
+
+.appointment-form-intro-icon {
+  @apply grid size-10 shrink-0 place-items-center rounded-[9px] bg-prescript-surface text-prescript-primary shadow-[0_5px_14px_rgba(20,36,42,0.07)];
+}
+
+.appointment-form-intro.is-rescheduling .appointment-form-intro-icon {
+  @apply text-prescript-copper;
+}
+
+.appointment-form-intro > div {
+  @apply grid min-w-0 gap-0.5;
+}
+
+.appointment-form-intro strong {
+  @apply truncate text-[15px] font-black text-prescript-ink;
+}
+
+.appointment-form-intro div > span {
+  @apply text-xs leading-relaxed text-prescript-muted;
+}
+
+.appointment-form-section {
+  @apply m-0 min-w-0 rounded-[11px] border border-prescript-line bg-prescript-surface p-4 shadow-[0_8px_22px_rgba(20,36,42,0.035)];
+}
+
+.appointment-form-section > legend {
+  @apply -ml-1 inline-flex items-center gap-2 px-2 text-[13px] font-black uppercase tracking-[0.08em] text-prescript-primary-dark;
+}
+
+.appointment-section-grid {
+  @apply mt-1 grid gap-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.appointment-schedule-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.appointment-duration-input {
+  @apply overflow-hidden p-0;
+}
+
+.appointment-duration-input > input {
+  @apply w-full px-3.5 py-3;
+}
+
+.appointment-duration-input > span {
+  @apply grid self-stretch place-items-center border-l border-prescript-line bg-prescript-muted-surface/60 px-3 text-xs font-black text-prescript-muted;
+}
+
+.appointment-schedule-feedback {
+  @apply mb-0 mt-3 flex items-start gap-2 rounded-[8px] bg-prescript-muted-surface/60 px-3 py-2.5 text-xs font-bold leading-relaxed text-prescript-muted;
+}
+
+.appointment-schedule-feedback svg {
+  @apply mt-px shrink-0 text-prescript-primary;
+}
+
+.appointment-schedule-feedback.is-error {
+  @apply bg-prescript-danger/10 text-prescript-danger;
+}
+
+.appointment-schedule-feedback.is-error svg {
+  @apply text-prescript-danger;
+}
+
+.appointment-modal-actions {
+  @apply z-[2];
+}
+
+.appointment-cancel-action {
+  @apply mr-auto;
+}
+
+.appointment-status-modal {
+  @apply relative z-[1] grid w-[min(480px,100%)] overflow-hidden rounded-prescript border border-prescript-line bg-prescript-surface shadow-[0_24px_70px_rgba(15,23,42,0.22)];
+  animation: modal-enter 180ms ease both;
+}
+
+.appointment-status-body {
+  @apply grid gap-4 px-6 py-5 text-sm leading-relaxed text-prescript-muted;
+}
+
+.appointment-status-body > p {
+  @apply m-0;
+}
+
+.appointment-status-summary {
+  @apply grid gap-1 rounded-[10px] border px-4 py-3.5;
+}
+
+.appointment-status-summary.is-danger {
+  @apply border-prescript-danger/20 bg-prescript-danger/5;
+}
+
+.appointment-status-summary.is-success {
+  @apply border-prescript-primary/20 bg-prescript-primary/5;
+}
+
+.appointment-status-summary strong {
+  @apply text-base text-prescript-ink;
+}
+
+.appointment-status-summary span {
+  @apply font-extrabold text-prescript-danger;
+}
+
+.appointment-status-summary.is-success span {
+  @apply text-prescript-primary-dark;
+}
+
+.appointment-status-summary small {
+  @apply text-xs font-bold text-prescript-muted;
+}
+
+.appointment-status-avatar.is-danger {
+  @apply bg-prescript-danger/10 text-prescript-danger;
+}
+
+.appointment-status-avatar.is-success {
+  @apply bg-prescript-primary/10 text-prescript-primary;
+}
+
+.appointment-status-eyebrow.is-danger {
+  @apply text-prescript-danger;
+}
+
+.appointment-status-eyebrow.is-success {
+  @apply text-prescript-primary-dark;
 }
 
 .form-section-title {
@@ -1077,6 +1302,18 @@ textarea:focus {
 
 .time-pill {
   @apply inline-flex items-center gap-[7px] font-extrabold text-prescript-primary;
+}
+
+.time-pill > span {
+  @apply grid gap-0.5;
+}
+
+.time-pill small {
+  @apply text-[10px] font-black uppercase tracking-[0.05em] text-prescript-muted;
+}
+
+.time-pill strong {
+  @apply text-sm text-prescript-primary;
 }
 
 .toolbar {
@@ -1189,7 +1426,7 @@ textarea:focus {
 }
 
 .preclinic-form {
-  @apply content-start;
+  @apply content-start gap-[18px];
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -1198,15 +1435,6 @@ textarea:focus {
   background:
     repeating-linear-gradient(0deg, transparent 0 35px, rgba(203, 216, 210, 0.3) 36px),
     var(--surface);
-}
-
-.preclinic-form .auth-grid {
-  @apply items-start;
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
-}
-
-.preclinic-form input {
-  @apply px-3 py-[11px];
 }
 
 .preclinic-patient {
@@ -1373,6 +1601,431 @@ dd {
   @apply absolute inset-0 z-0 border-0 bg-slate-900/45;
 }
 
+.form-modal {
+  --modal-control-height: 50px;
+  --modal-field-gap: 20px;
+}
+
+.form-modal .modal-header {
+  @apply relative bg-prescript-surface py-5 pl-6 pr-20 shadow-[inset_0_3px_0_rgba(15,107,100,0.9)];
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.form-modal .modal-header h2 {
+  @apply font-prescript-display font-[760] leading-[1.08] tracking-[-0.015em] text-prescript-ink;
+  font-size: clamp(25px, 3vw, 29px);
+}
+
+.form-modal .modal-header .eyebrow {
+  @apply inline-flex items-center gap-2 tracking-[0.08em];
+}
+
+.form-modal .modal-header .eyebrow::before {
+  content: "";
+  @apply h-0.5 w-[18px] rounded-full bg-prescript-primary;
+}
+
+.form-modal .modal-header > div:not(.doctor-avatar) {
+  @apply min-w-0;
+}
+
+.form-modal .modal-header > .icon-button:last-child {
+  @apply absolute right-[18px] top-[18px] size-11 bg-prescript-muted-surface/55;
+}
+
+.form-modal .modal-header > .icon-button:last-child:hover {
+  @apply border-prescript-primary/35 bg-prescript-primary/10 text-prescript-primary-dark;
+}
+
+.form-modal .modal-form:not(.patient-form),
+.form-modal .modal-scroll-area {
+  gap: var(--modal-field-gap);
+}
+
+.form-modal .modal-form:not(.patient-form),
+.form-modal .modal-scroll-area,
+.form-modal .preclinic-modal-form {
+  @apply p-6;
+}
+
+.form-modal label {
+  gap: 9px;
+}
+
+.form-modal label > span:first-child {
+  @apply text-[14px] font-extrabold text-prescript-muted;
+  transition: color 140ms ease;
+}
+
+.form-modal label:focus-within > span:first-child {
+  @apply text-prescript-primary-dark;
+}
+
+.form-modal label > input:not([type="checkbox"]),
+.form-modal label > select,
+.form-modal .phone-input-group > input {
+  min-height: var(--modal-control-height);
+  @apply px-3.5 py-3;
+}
+
+.form-modal label > textarea {
+  @apply min-h-[116px] resize-y px-3.5 py-3 leading-relaxed;
+}
+
+.form-modal .input-shell,
+.form-modal .readonly-tag-field {
+  min-height: var(--modal-control-height);
+}
+
+.form-modal .input-shell > input {
+  @apply min-h-0 p-0;
+}
+
+.form-modal label > small {
+  @apply -mt-0.5 text-xs leading-normal;
+}
+
+.form-modal .modal-actions {
+  @apply min-h-[72px] items-center gap-3 px-6 py-4;
+}
+
+.form-modal .modal-actions .compact {
+  @apply min-h-11 min-w-[120px] px-[18px];
+}
+
+.vitals-form-intro {
+  @apply flex items-center gap-3 rounded-[10px] border border-prescript-primary/20 bg-prescript-primary/10 px-4 py-3.5;
+}
+
+.vitals-form-intro-icon {
+  @apply grid size-10 flex-none place-items-center rounded-prescript bg-prescript-primary text-white shadow-[0_6px_14px_rgba(15,107,100,0.18)];
+}
+
+.vitals-form-intro > div {
+  @apply grid gap-0.5;
+}
+
+.vitals-form-intro strong {
+  @apply text-[16px] font-black text-prescript-primary-dark;
+}
+
+.vitals-form-intro p {
+  @apply m-0 text-[13px] font-[650] leading-normal text-prescript-muted;
+}
+
+.vitals-grid {
+  @apply grid gap-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vital-card {
+  @apply m-0 min-w-0 rounded-[10px] border border-prescript-line bg-prescript-surface/95 p-4 shadow-[0_8px_22px_rgba(20,36,42,0.055)];
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.vital-card:focus-within {
+  @apply border-prescript-primary/45 shadow-[0_10px_28px_rgba(15,107,100,0.1)];
+}
+
+.vital-pressure-card {
+  @apply col-span-full;
+}
+
+.vital-card-heading,
+.form-modal .vital-field > .vital-field-heading {
+  @apply flex items-center gap-2.5 text-prescript-ink;
+}
+
+.vital-card-heading {
+  @apply mb-3.5 w-full p-0;
+}
+
+.vital-card-heading > span:last-child,
+.form-modal .vital-field-title {
+  @apply grid min-w-0 gap-0.5;
+}
+
+.vital-card-heading strong,
+.vital-field-title strong {
+  @apply text-[15px] font-black leading-tight text-prescript-ink;
+}
+
+.vital-card-heading small,
+.vital-field-title small {
+  @apply text-xs font-[650] leading-normal text-prescript-muted;
+}
+
+.vital-card-icon {
+  @apply grid size-9 flex-none place-items-center rounded-prescript bg-prescript-primary/10 text-prescript-primary;
+}
+
+.vital-tone-accent .vital-card-icon {
+  @apply bg-prescript-accent/10 text-prescript-accent;
+}
+
+.vital-tone-copper .vital-card-icon {
+  @apply bg-prescript-copper/10 text-prescript-copper;
+}
+
+.vital-pressure-fields {
+  @apply clear-both grid gap-3.5;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vital-field {
+  @apply content-start;
+}
+
+.vital-field-compact {
+  @apply grid min-w-0 gap-2;
+}
+
+.form-modal .vital-field > .vital-field-heading {
+  @apply text-prescript-ink;
+}
+
+.vital-input-shell {
+  @apply grid min-w-0 overflow-hidden rounded-prescript border border-prescript-line bg-prescript-surface;
+  grid-template-columns: minmax(0, 1fr) auto;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.vital-input-shell:focus-within {
+  @apply border-prescript-primary shadow-[0_0_0_3px_rgba(15,107,100,0.12)];
+}
+
+.vital-input-shell input {
+  @apply min-h-[52px] min-w-0 rounded-none border-0 bg-transparent px-3.5 py-2 text-[19px] font-extrabold tabular-nums text-prescript-ink shadow-none;
+}
+
+.vital-input-shell input:focus {
+  @apply border-0 shadow-none;
+}
+
+.vital-unit {
+  @apply grid min-w-[58px] place-items-center border-l border-prescript-line bg-prescript-muted-surface/65 px-2.5 text-xs font-black text-prescript-muted;
+}
+
+.form-modal .vital-previous {
+  @apply mt-0 inline-flex min-h-7 w-fit items-center gap-1.5 rounded-full bg-prescript-muted-surface/65 px-2.5 py-1 text-[11px] font-bold leading-none text-prescript-muted;
+}
+
+.form-modal .vital-previous.has-value {
+  @apply bg-prescript-primary/10 text-prescript-primary-dark;
+}
+
+.vital-field.is-disabled {
+  @apply bg-prescript-muted-surface/45 shadow-none;
+}
+
+.vital-field.is-disabled .vital-input-shell {
+  @apply border-dashed bg-prescript-muted-surface/70;
+}
+
+.vital-field.is-disabled .vital-input-shell input {
+  @apply cursor-not-allowed text-prescript-muted;
+}
+
+.preclinic-wizard-steps {
+  @apply grid items-center rounded-[10px] border border-prescript-line bg-prescript-muted-surface/45 p-2.5;
+  grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr) 36px minmax(0, 1fr);
+}
+
+.preclinic-wizard-step {
+  @apply grid min-w-0 items-center gap-2.5 rounded-prescript border-0 bg-transparent p-2 text-left text-prescript-muted;
+  grid-template-columns: 34px minmax(0, 1fr);
+}
+
+.preclinic-wizard-step > span:first-child {
+  @apply grid size-[34px] place-items-center rounded-full border border-prescript-line-strong bg-prescript-surface text-sm font-black text-prescript-muted;
+}
+
+.preclinic-wizard-step > span:last-child {
+  @apply grid min-w-0 gap-0.5;
+}
+
+.preclinic-wizard-step strong {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap text-sm font-black;
+}
+
+.preclinic-wizard-step small {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-bold;
+}
+
+.preclinic-wizard-step:hover {
+  @apply bg-prescript-surface/65 text-prescript-primary-dark;
+}
+
+.preclinic-wizard-step.active {
+  @apply bg-prescript-surface text-prescript-primary-dark shadow-[0_4px_14px_rgba(20,36,42,0.07)];
+}
+
+.preclinic-wizard-step.active > span:first-child,
+.preclinic-wizard-step.completed > span:first-child {
+  @apply border-prescript-primary bg-prescript-primary text-white;
+}
+
+.preclinic-wizard-step.completed {
+  @apply text-prescript-primary-dark;
+}
+
+.preclinic-wizard-line {
+  @apply h-0.5 rounded-full bg-prescript-line-strong/70;
+}
+
+.preclinic-wizard-line.completed {
+  @apply bg-prescript-primary;
+}
+
+.preclinic-step-panel {
+  @apply grid gap-[18px];
+  animation: route-enter 160ms ease both;
+}
+
+.medical-form-intro {
+  @apply border-prescript-accent/20 bg-prescript-accent/10;
+}
+
+.medical-form-intro .vitals-form-intro-icon {
+  @apply bg-prescript-accent shadow-[0_6px_14px_rgba(54,92,157,0.18)];
+}
+
+.medical-form-intro strong {
+  @apply text-prescript-accent;
+}
+
+.medical-profile-grid {
+  @apply grid items-stretch gap-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.medical-profile-field {
+  @apply content-start rounded-[10px] border border-prescript-line bg-prescript-surface/95 p-4 shadow-[0_8px_22px_rgba(20,36,42,0.055)];
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.medical-profile-field:focus-within {
+  @apply border-prescript-primary/45 shadow-[0_10px_28px_rgba(15,107,100,0.1)];
+}
+
+.form-modal .medical-profile-field > span:first-child {
+  @apply text-[15px] font-black text-prescript-ink;
+}
+
+.form-modal .medical-profile-field > small {
+  @apply mt-0 text-[11px] leading-normal text-prescript-muted;
+}
+
+.medical-profile-field textarea {
+  @apply min-h-[112px] bg-prescript-surface;
+}
+
+.medical-blood-type select {
+  @apply bg-prescript-surface;
+}
+
+.medical-clinical-notes textarea {
+  @apply min-h-[132px];
+}
+
+.preclinic-wizard-actions {
+  @apply z-[2];
+}
+
+.review-form-intro {
+  @apply border-prescript-primary/25 bg-prescript-primary/10;
+}
+
+.preclinic-review-grid {
+  @apply grid items-start gap-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preclinic-review-card {
+  @apply overflow-hidden rounded-[10px] border border-prescript-line bg-prescript-surface/95 shadow-[0_8px_22px_rgba(20,36,42,0.055)];
+}
+
+.preclinic-review-card > header {
+  @apply flex min-h-[54px] items-center justify-between gap-3 border-b border-prescript-line bg-prescript-muted-surface/45 px-4 py-3;
+}
+
+.preclinic-review-card > header > span {
+  @apply inline-flex items-center gap-2 text-[15px] font-black text-prescript-ink;
+}
+
+.preclinic-review-card > header svg {
+  @apply text-prescript-primary;
+}
+
+.preclinic-review-card > header button {
+  @apply rounded-full border border-prescript-primary/25 bg-prescript-surface px-2.5 py-1 text-xs font-extrabold text-prescript-primary;
+}
+
+.preclinic-review-card > header button:hover,
+.preclinic-review-card > header button:focus-visible {
+  @apply border-prescript-primary bg-prescript-primary/10 outline-none;
+}
+
+.preclinic-review-details,
+.preclinic-review-vitals {
+  @apply grid gap-0 p-4;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preclinic-review-details > div,
+.preclinic-review-vitals > div {
+  @apply min-w-0 border-b border-prescript-line/70 py-3;
+}
+
+.preclinic-review-details > div:nth-child(odd),
+.preclinic-review-vitals > div:nth-child(odd) {
+  @apply pr-3;
+}
+
+.preclinic-review-details > div:nth-child(even),
+.preclinic-review-vitals > div:nth-child(even) {
+  @apply border-l border-prescript-line/70 pl-3;
+}
+
+.preclinic-review-details > div:last-child,
+.preclinic-review-vitals > div:last-child {
+  @apply border-b-0;
+}
+
+.preclinic-review-details .review-detail-wide {
+  @apply col-span-full border-b-0 border-l-0 pl-0 pr-0;
+}
+
+.preclinic-review-details dt,
+.preclinic-review-vitals dt {
+  @apply text-[11px] font-extrabold uppercase tracking-[0.055em] text-prescript-muted;
+}
+
+.preclinic-review-details dd,
+.preclinic-review-vitals dd {
+  @apply mt-1.5 min-w-0 text-[15px] font-extrabold leading-normal text-prescript-ink;
+}
+
+.review-chip-list {
+  @apply flex flex-wrap gap-1.5;
+}
+
+.review-chip-list > span {
+  @apply inline-flex rounded-full bg-prescript-primary/10 px-2.5 py-1 text-xs font-extrabold text-prescript-primary-dark;
+  overflow-wrap: anywhere;
+}
+
+.preclinic-review-details .review-empty-value,
+.preclinic-review-vitals .review-empty-value,
+.review-empty-value {
+  @apply font-bold italic text-prescript-muted;
+}
+
+.review-notes {
+  @apply whitespace-pre-wrap font-[650];
+  overflow-wrap: anywhere;
+}
+
 .profile-modal {
   @apply relative z-[1] grid overflow-hidden rounded-prescript border border-prescript-line shadow-[0_24px_70px_rgba(15,23,42,0.22)];
   width: min(620px, 100%);
@@ -1476,7 +2129,12 @@ dd {
 }
 
 .profile-modal .modal-actions {
-  @apply sticky bottom-0 -mx-5 -mb-5 mt-1;
+  @apply sticky bottom-0 mt-1;
+}
+
+.form-modal .modal-form:not(.patient-form) > .modal-actions,
+.form-modal .preclinic-modal-form > .modal-actions {
+  @apply sticky bottom-0 -mx-6 -mb-6 mt-1;
 }
 
 .user-management-page {
@@ -1772,7 +2430,11 @@ dd {
   }
 
   .appointment-actions {
-    @apply flex-wrap justify-start;
+    @apply justify-items-start;
+  }
+
+  .appointment-action-controls {
+    @apply justify-start;
   }
 }
 
@@ -1936,6 +2598,75 @@ dd {
     @apply place-items-center p-3;
   }
 
+  .form-modal {
+    --modal-field-gap: 16px;
+  }
+
+  .form-modal .modal-header,
+  .form-modal .modal-form:not(.patient-form),
+  .form-modal .modal-scroll-area,
+  .form-modal .preclinic-modal-form {
+    @apply p-4;
+  }
+
+  .form-modal .modal-header {
+    @apply py-4 pl-4 pr-16;
+  }
+
+  .form-modal .modal-header > .icon-button:last-child {
+    @apply right-3.5 top-3.5 size-10;
+  }
+
+  .form-modal .patient-form {
+    @apply p-0;
+  }
+
+  .form-modal .modal-actions {
+    @apply px-4 pb-4 pt-3.5;
+  }
+
+  .form-modal .modal-actions > button {
+    @apply w-full;
+  }
+
+  .appointment-section-grid,
+  .appointment-schedule-grid {
+    @apply grid-cols-1;
+  }
+
+  .appointment-form-section {
+    @apply p-3.5;
+  }
+
+  .appointment-cancel-action {
+    @apply mr-0;
+  }
+
+  .appointment-status-body {
+    @apply px-4 py-4;
+  }
+
+  .pending-closure-header {
+    @apply px-4;
+  }
+
+  .vitals-grid {
+    @apply grid-cols-1;
+  }
+
+  .preclinic-review-grid {
+    @apply grid-cols-1;
+  }
+
+  .vital-pressure-card {
+    @apply col-span-1;
+  }
+
+  .form-modal .modal-form:not(.patient-form) > .modal-actions,
+  .form-modal .preclinic-modal-form > .modal-actions {
+    @apply -mx-4 -mb-4;
+  }
+
   .profile-modal {
     @apply w-[min(100%,620px)] max-h-[calc(100dvh-24px)];
   }
@@ -2051,6 +2782,53 @@ dd {
 
   .modal-scroll-area {
     @apply gap-[13px] p-3.5;
+  }
+
+  .form-modal .modal-scroll-area {
+    @apply gap-[15px] p-3.5;
+  }
+
+  .vital-pressure-fields {
+    @apply grid-cols-1;
+  }
+
+  .vitals-form-intro {
+    @apply items-start;
+  }
+
+  .preclinic-wizard-steps {
+    @apply p-2;
+    grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) 16px minmax(0, 1fr);
+  }
+
+  .preclinic-wizard-step {
+    @apply grid-cols-1 justify-items-center gap-0 p-1.5;
+  }
+
+  .preclinic-wizard-step > span:first-child {
+    @apply size-[30px];
+  }
+
+  .preclinic-wizard-step > span:last-child {
+    @apply hidden;
+  }
+
+  .medical-profile-grid {
+    @apply grid-cols-1;
+  }
+
+  .preclinic-review-details,
+  .preclinic-review-vitals {
+    @apply grid-cols-1;
+  }
+
+  .preclinic-review-details > div,
+  .preclinic-review-vitals > div,
+  .preclinic-review-details > div:nth-child(odd),
+  .preclinic-review-vitals > div:nth-child(odd),
+  .preclinic-review-details > div:nth-child(even),
+  .preclinic-review-vitals > div:nth-child(even) {
+    @apply border-l-0 px-0;
   }
 
   .icon-button {

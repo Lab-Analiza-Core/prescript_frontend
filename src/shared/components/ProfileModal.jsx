@@ -237,7 +237,7 @@ export function ProfileModal({ isOpen, onClose, user }) {
     <div className="modal-layer" role="presentation">
       <button className="modal-backdrop" onClick={onClose} type="button" aria-label="Cerrar perfil" />
 
-      <section className="profile-modal" aria-labelledby="profile-modal-title" role="dialog" aria-modal="true">
+      <section className="form-modal profile-modal" aria-labelledby="profile-modal-title" role="dialog" aria-modal="true">
         <header className="modal-header">
           <div className="doctor-avatar">
             <UserRound size={22} aria-hidden="true" />

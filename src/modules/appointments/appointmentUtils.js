@@ -17,6 +17,7 @@ export const statusLabels = {
   cancelled: "Cancelada",
   no_show: "No se presento",
   rescheduled: "Reprogramada",
+  superseded: "Reprogramada · anterior",
 };
 
 export const statusTone = {
@@ -25,12 +26,13 @@ export const statusTone = {
   cancelled: "cancelled",
   no_show: "cancelled",
   rescheduled: "rescheduled",
+  superseded: "rescheduled",
 };
 
 export const APPOINTMENT_TIME_CONFLICT_MESSAGE =
   "Ese horario ya esta ocupado para este doctor. Elige otra hora disponible para continuar.";
 
-const ACTIVE_APPOINTMENT_STATUSES = new Set(["scheduled", "rescheduled"]);
+export const ACTIVE_APPOINTMENT_STATUSES = new Set(["scheduled", "rescheduled"]);
 
 export const currentTime = () => {
   const now = new Date();
@@ -38,6 +40,16 @@ export const currentTime = () => {
 };
 
 export const getDefaultAppointmentTime = (dateKey) => (dateKey === today() ? currentTime() : "08:00");
+
+export const getSuggestedAppointmentStart = () => {
+  const suggested = new Date(Date.now() + 30 * 60000);
+  suggested.setSeconds(0, 0);
+  suggested.setMinutes(Math.ceil(suggested.getMinutes() / 5) * 5);
+  return {
+    date: toDateKey(suggested),
+    time: `${String(suggested.getHours()).padStart(2, "0")}:${String(suggested.getMinutes()).padStart(2, "0")}`,
+  };
+};
 
 export const toDateTimeLocal = (date, time) => `${date}T${time || "08:00"}:00`;
 
@@ -47,6 +59,12 @@ export const isPastDateTime = (dateKey, time) => {
 };
 
 export const addMinutes = (date, minutes) => new Date(date.getTime() + Number(minutes || 30) * 60000);
+
+export const isAppointmentPastDue = (appointment) => {
+  if (!appointment || !ACTIVE_APPOINTMENT_STATUSES.has(appointment.status)) return false;
+  const appointmentEnd = addMinutes(new Date(appointment.scheduled_at), appointment.duration_minutes);
+  return appointmentEnd.getTime() <= Date.now();
+};
 
 export const hasAppointmentTimeConflict = ({ appointments, appointmentId, date, doctor, durationMinutes, time }) => {
   if (!date || !doctor || !time) return false;
