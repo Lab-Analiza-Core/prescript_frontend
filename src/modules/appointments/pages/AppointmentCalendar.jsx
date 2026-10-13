@@ -8,6 +8,7 @@ import {
   MessageCircle,
   RotateCcw,
 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useAuth } from "../../../shared/context/useAuth";
@@ -20,10 +21,13 @@ import {
 import { AppointmentModal } from "../components/AppointmentModal";
 import { toTime } from "../appointmentUtils";
 import { useAgenda } from "../hooks/useAgenda";
+import { getCountryLocale } from "../../../shared/utils/countryUtils";
 
 export function AppointmentCalendar() {
   const { user } = useAuth();
-  const agenda = useAgenda(user);
+  const [searchParams] = useSearchParams();
+  const agenda = useAgenda(user, searchParams.get("date"));
+  const locale = getCountryLocale(user?.country);
   const {
     appointmentsByDate,
     calendarDays,
@@ -77,7 +81,7 @@ export function AppointmentCalendar() {
         <div className="metric-card">
           <span>Citas del dia</span>
           <strong>{metrics.total}</strong>
-          <small>{parseDateKey(selectedDate).toLocaleDateString("es-HN")}</small>
+          <small>{parseDateKey(selectedDate).toLocaleDateString(locale)}</small>
         </div>
         <div className="metric-card">
           <span>Confirmadas</span>
@@ -99,7 +103,7 @@ export function AppointmentCalendar() {
           <header className="appointment-calendar-header">
             <div>
               <span className="eyebrow">Calendario</span>
-              <h2>{getMonthLabel(visibleMonth)}</h2>
+              <h2>{getMonthLabel(visibleMonth, locale)}</h2>
             </div>
             <div className="calendar-controls">
               <button className="icon-button" onClick={() => goToMonth(-1)} type="button" aria-label="Mes anterior">
@@ -152,7 +156,7 @@ export function AppointmentCalendar() {
               <span className="eyebrow">Historial</span>
               <h2>Citas programadas</h2>
             </div>
-            <span>{parseDateKey(selectedDate).toLocaleDateString("es-HN")}</span>
+            <span>{parseDateKey(selectedDate).toLocaleDateString(locale)}</span>
           </header>
 
           {isLoading ? <div className="empty-state">Cargando agenda</div> : null}
@@ -162,7 +166,7 @@ export function AppointmentCalendar() {
               <article className="appointment-row" key={appointment.id}>
                 <button className="time-pill" onClick={() => selectAppointment(appointment)} type="button">
                   <Clock size={16} aria-hidden="true" />
-                  {toTime(appointment.scheduled_at)}
+                  {toTime(appointment.scheduled_at, locale)}
                 </button>
                 <div>
                   <strong>{appointment.patient_name}</strong>

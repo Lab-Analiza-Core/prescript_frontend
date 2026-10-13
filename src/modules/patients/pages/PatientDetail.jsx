@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 
 import { getPatient } from "../../../api/endpoints/patients";
 import { PageHeader } from "../../../shared/components/PageHeader";
+import { useAuth } from "../../../shared/context/useAuth";
+import { getCountryLocale } from "../../../shared/utils/countryUtils";
 
 const tabs = [
   { label: "Clinico", icon: HeartPulse },
@@ -12,18 +14,18 @@ const tabs = [
   { label: "Comercial", icon: WalletCards },
 ];
 
-const formatDate = (value) => {
+const formatDate = (value, locale) => {
   if (!value) return "Sin dato";
-  return new Intl.DateTimeFormat("es-HN", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(new Date(value));
 };
 
-const formatDateTime = (value) => {
+const formatDateTime = (value, locale) => {
   if (!value) return "Sin registro";
-  return new Intl.DateTimeFormat("es-HN", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -73,6 +75,8 @@ function VitalMetric({ label, value, unit }) {
 }
 
 export function PatientDetail() {
+  const { user } = useAuth();
+  const locale = getCountryLocale(user?.country);
   const { patientId } = useParams();
   const [patient, setPatient] = useState(null);
   const [activeTab, setActiveTab] = useState("Clinico");
@@ -170,7 +174,7 @@ export function PatientDetail() {
                 </div>
                 <div>
                   <dt>Registrado</dt>
-                  <dd>{formatDate(patient.created_at)}</dd>
+                  <dd>{formatDate(patient.created_at, locale)}</dd>
                 </div>
               </dl>
             </section>
@@ -210,7 +214,7 @@ export function PatientDetail() {
               <VitalMetric label="Altura" value={latestVitals?.height_cm} unit="cm" />
               <VitalMetric label="Peso" value={latestVitals?.weight_kg} unit="kg" />
             </div>
-            <p className="patient-muted-line">Ultima captura: {formatDateTime(latestVitals?.recorded_at)}</p>
+            <p className="patient-muted-line">Ultima captura: {formatDateTime(latestVitals?.recorded_at, locale)}</p>
           </section>
         </>
       ) : null}
@@ -220,7 +224,7 @@ export function PatientDetail() {
           {recentVitals.length === 0 ? <div className="empty-state">Sin capturas de preclinica</div> : null}
           {recentVitals.map((vitals) => (
             <article className="table-row preclinic-history-row" key={vitals.id}>
-              <strong>{formatDateTime(vitals.recorded_at)}</strong>
+              <strong>{formatDateTime(vitals.recorded_at, locale)}</strong>
               <span>PA {bloodPressure(vitals)}</span>
               <span>SpO2 {vitals.oxygen_saturation || "-"}</span>
               <span>T {vitals.temperature || "-"}</span>

@@ -1,4 +1,4 @@
-import { HeartPulse, Stethoscope } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import { navigationItems, normalizeRole } from "../../config/accessConfig";
@@ -32,11 +32,6 @@ export function Sidebar({ onNavigate, role }) {
           );
         })}
       </nav>
-
-      <div className="sidebar-footer">
-        <HeartPulse size={18} aria-hidden="true" />
-        <span>Ronda activa</span>
-      </div>
     </aside>
   );
 }

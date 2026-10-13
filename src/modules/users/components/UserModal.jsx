@@ -12,6 +12,7 @@ const emptyForm = {
   roles: ["SECRETARY"],
   is_active: true,
   is_staff: false,
+  country_code: "",
 };
 
 const getInitialForm = (user) =>
@@ -25,11 +26,18 @@ const getInitialForm = (user) =>
         roles: user.roles?.length ? user.roles : [],
         is_active: Boolean(user.is_active),
         is_staff: Boolean(user.is_staff),
+        country_code: user.country?.code || "",
       }
     : emptyForm;
 
-export function UserModal({ isSaving, mode, onClose, onSubmit, user }) {
-  const [form, setForm] = useState(() => getInitialForm(user));
+export function UserModal({ canSelectGlobal = false, countries = [], isSaving, mode, onClose, onSubmit, user }) {
+  const [form, setForm] = useState(() => {
+    const initialForm = getInitialForm(user);
+    if (!canSelectGlobal && !initialForm.country_code && countries.length === 1) {
+      initialForm.country_code = countries[0].code;
+    }
+    return initialForm;
+  });
   const isEditing = mode === "edit";
 
   const updateField = (field, value) => {
@@ -100,6 +108,16 @@ export function UserModal({ isSaving, mode, onClose, onSubmit, user }) {
               value={form.password}
               onChange={(event) => updateField("password", event.target.value)}
             />
+          </label>
+
+          <label className="field-wide">
+            <span>Pais de acceso</span>
+            <select value={form.country_code} onChange={(event) => updateField("country_code", event.target.value)}>
+              {canSelectGlobal ? <option value="">Global (solo administrador maestro)</option> : null}
+              {countries.map((country) => (
+                <option key={country.code} value={country.code}>{country.name}</option>
+              ))}
+            </select>
           </label>
 
           <div className="field-wide user-role-grid" role="group" aria-label="Roles de usuario">

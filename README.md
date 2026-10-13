@@ -17,6 +17,7 @@ Aplicacion web de Prescript construida con React y Vite. Este frontend consume l
 - Inicio de sesion y activacion de acceso medico.
 - Navegacion protegida por autenticacion.
 - Control de acceso por rol.
+- Selector de pais para administracion global y contexto fijo para roles de pais.
 - Agenda de citas.
 - Gestion de pacientes.
 - Captura de preclinica.
@@ -134,6 +135,10 @@ npm run lint
 ## Relacion con el backend
 
 El cliente HTTP esta en `src/api/axios.js`. Usa `VITE_API_URL`, agrega el token JWT en cada solicitud y maneja la renovacion del access token mediante `/auth/refresh`.
+
+Cuando existe un pais activo, el cliente tambien envia
+`X-Prescript-Country`. La API valida este valor contra los accesos del usuario;
+el selector no sustituye las reglas de autorizacion del backend.
 
 Para desarrollo con Docker, el backend esperado por defecto es:
 

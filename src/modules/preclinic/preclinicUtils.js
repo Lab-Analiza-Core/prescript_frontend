@@ -27,9 +27,9 @@ export const numberOrNull = (value) => {
   return Number(value);
 };
 
-export const formatTime = (value) => {
+export const formatTime = (value, locale = "es-HN") => {
   if (!value) return "";
-  return new Intl.DateTimeFormat("es-HN", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));

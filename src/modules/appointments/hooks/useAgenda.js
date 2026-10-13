@@ -25,14 +25,17 @@ import {
   toDateTimeLocal,
 } from "../appointmentUtils";
 
-export function useAgenda(user) {
-  const [selectedDate, setSelectedDate] = useState(today());
-  const [visibleMonth, setVisibleMonth] = useState(() => toMonthAnchor(today()));
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+export function useAgenda(user, focusedDate) {
+  const initialDate = DATE_KEY_PATTERN.test(focusedDate || "") ? focusedDate : today();
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [visibleMonth, setVisibleMonth] = useState(() => toMonthAnchor(initialDate));
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [form, setForm] = useState({ ...emptyAppointmentForm, date: today() });
+  const [form, setForm] = useState({ ...emptyAppointmentForm, date: initialDate });
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -266,7 +269,7 @@ export function useAgenda(user) {
   };
 
   const sendReminder = (appointment) => {
-    const url = buildWhatsAppUrl(appointment);
+    const url = buildWhatsAppUrl(appointment, user?.country);
     if (!url) {
       setMessage("");
       setErrorMessage("El paciente no tiene telefono registrado para WhatsApp.");

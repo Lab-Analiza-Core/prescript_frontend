@@ -10,8 +10,12 @@ import {
 import { PreclinicVitalsModal } from "../components/PreclinicVitalsModal";
 import { usePreclinicCapture } from "../hooks/usePreclinicCapture";
 import { formatTime } from "../preclinicUtils";
+import { useAuth } from "../../../shared/context/useAuth";
+import { getCountryLocale } from "../../../shared/utils/countryUtils";
 
 export function PreclinicCapture() {
+  const { user } = useAuth();
+  const locale = getCountryLocale(user?.country);
   const preclinic = usePreclinicCapture();
   const {
     appointments,
@@ -52,7 +56,7 @@ export function PreclinicCapture() {
         <div className="metric-card">
           <span>Citas de la fecha</span>
           <strong>{appointments.length}</strong>
-          <small>{parseDateKey(selectedDate).toLocaleDateString("es-HN")}</small>
+          <small>{parseDateKey(selectedDate).toLocaleDateString(locale)}</small>
         </div>
         <div className="metric-card">
           <span>Pacientes registrados</span>
@@ -74,7 +78,7 @@ export function PreclinicCapture() {
           <header className="appointment-calendar-header">
             <div>
               <span className="eyebrow">Calendario</span>
-              <h2>{getMonthLabel(visibleMonth)}</h2>
+              <h2>{getMonthLabel(visibleMonth, locale)}</h2>
             </div>
             <div className="calendar-controls">
               <button className="icon-button" onClick={() => goToMonth(-1)} type="button" aria-label="Mes anterior">
@@ -128,7 +132,7 @@ export function PreclinicCapture() {
               <span className="eyebrow">Jornada</span>
               <h2>Pacientes del dia</h2>
             </div>
-            <span>{parseDateKey(selectedDate).toLocaleDateString("es-HN")}</span>
+            <span>{parseDateKey(selectedDate).toLocaleDateString(locale)}</span>
           </header>
 
           <div className="preclinic-search">
@@ -153,7 +157,7 @@ export function PreclinicCapture() {
                 onClick={() => selectRecord("appointment", appointment)}
                 type="button"
               >
-                <span>{formatTime(appointment.scheduled_at)}</span>
+                <span>{formatTime(appointment.scheduled_at, locale)}</span>
                 <strong>{appointment.patient_name}</strong>
                 <small>{appointment.patient_dni ? `DNI ${appointment.patient_dni}` : `Paciente #${appointment.patient}`}</small>
               </button>

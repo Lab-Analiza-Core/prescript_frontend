@@ -630,22 +630,208 @@ textarea:focus {
   grid-template-columns: minmax(220px, 1fr) auto auto auto;
 }
 
-.search-shell {
-  @apply min-w-0 max-w-[520px];
+.global-search {
+  @apply relative min-w-0 max-w-[560px];
+}
+
+.global-search .search-shell {
+  @apply w-full max-w-none border-prescript-line-strong/60 bg-prescript-surface shadow-[0_5px_16px_rgba(20,36,42,0.05)] transition-[border-color,box-shadow,background-color] duration-150;
+}
+
+.global-search .search-shell.active {
+  @apply border-prescript-primary bg-white shadow-[0_0_0_3px_rgba(15,107,100,0.10),0_12px_28px_rgba(20,36,42,0.10)];
+}
+
+.global-search .search-shell > svg:first-child {
+  @apply text-prescript-primary;
+}
+
+.global-search .search-shell kbd,
+.search-results-footer kbd {
+  @apply rounded border border-prescript-line-strong/60 bg-prescript-muted-surface/70 px-1.5 py-0.5 font-sans text-[10px] font-extrabold text-prescript-muted shadow-[0_1px_0_rgba(20,36,42,0.08)];
+}
+
+.search-loader {
+  @apply animate-spin text-prescript-primary;
+}
+
+.search-results-popover {
+  @apply absolute left-0 top-[calc(100%+9px)] z-30 max-h-[min(620px,calc(100vh-100px))] overflow-auto rounded-[14px] border border-prescript-line-strong/70 p-2 shadow-[0_24px_64px_rgba(20,36,42,0.2)];
+  width: min(560px, calc(100vw - 32px));
+  background:
+    linear-gradient(180deg, rgba(15, 107, 100, 0.055), transparent 72px),
+    var(--surface);
+}
+
+.search-guidance {
+  @apply flex items-center gap-3 rounded-[10px] border border-dashed border-prescript-line-strong/70 bg-white/65 p-4;
+}
+
+.search-guidance-icon {
+  @apply grid size-9 shrink-0 place-items-center rounded-full bg-prescript-primary/10 text-prescript-primary;
+}
+
+.search-guidance div,
+.search-result-copy {
+  @apply grid min-w-0;
+}
+
+.search-guidance strong {
+  @apply text-sm text-prescript-ink;
+}
+
+.search-guidance div > span {
+  @apply mt-0.5 text-xs leading-relaxed text-prescript-muted;
+}
+
+.search-empty-state {
+  @apply px-4 py-8 text-center text-sm font-semibold text-prescript-muted;
+}
+
+.search-result-group + .search-result-group {
+  @apply mt-1 border-t border-prescript-line/70 pt-1;
+}
+
+.search-result-heading {
+  @apply flex items-center gap-1.5 px-2.5 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-prescript-muted;
+}
+
+.search-result-heading small {
+  @apply ml-auto rounded-full bg-prescript-muted-surface px-1.5 py-0.5 text-[9px] tracking-normal;
+}
+
+.search-result {
+  @apply relative grid w-full grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2.5 overflow-hidden rounded-[9px] border-0 bg-transparent px-2.5 py-2 text-left text-prescript-ink transition-colors duration-100;
+}
+
+.search-result:hover,
+.search-result.active {
+  @apply bg-prescript-muted-surface/75;
+}
+
+.search-result:focus-visible {
+  @apply outline-none ring-2 ring-inset ring-prescript-primary/35;
+}
+
+.search-result::before {
+  content: "";
+  @apply absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-prescript-primary opacity-0 transition-opacity;
+}
+
+.search-result:hover::before,
+.search-result.active::before {
+  @apply opacity-100;
+}
+
+.search-result.appointment::before {
+  @apply bg-prescript-copper;
+}
+
+.search-result.prescription::before {
+  @apply bg-prescript-accent;
+}
+
+.search-result-mark {
+  @apply grid size-8 place-items-center rounded-[8px] bg-prescript-primary/10 text-prescript-primary;
+}
+
+.search-result.appointment .search-result-mark {
+  @apply bg-prescript-copper/10 text-prescript-copper;
+}
+
+.search-result.prescription .search-result-mark {
+  @apply bg-prescript-accent/10 text-prescript-accent;
+}
+
+.search-result-copy strong {
+  @apply truncate text-sm;
+}
+
+.search-result-copy > span {
+  @apply truncate text-xs text-prescript-muted;
+}
+
+.search-result > small {
+  @apply max-w-40 truncate text-right text-[11px] font-bold text-prescript-muted;
+}
+
+.search-results-footer {
+  @apply mt-1 flex items-center justify-between gap-3 border-t border-prescript-line px-2.5 pb-1 pt-2 text-[10px] font-bold text-prescript-muted;
+}
+
+.search-results-footer > span:last-child {
+  @apply flex items-center gap-1;
 }
 
 .session-chip {
-  @apply flex gap-1.5;
+  @apply flex items-center gap-2;
 }
 
-.session-chip span,
+.context-chip {
+  @apply flex h-11 min-w-0 items-center gap-2 rounded-[12px] border bg-white/80 py-1.5 pl-1.5 pr-3 shadow-[0_5px_14px_rgba(20,36,42,0.06)];
+}
+
+.context-chip-icon {
+  @apply grid size-7 shrink-0 place-items-center rounded-[8px];
+}
+
+.context-chip-copy {
+  @apply grid min-w-0 gap-0 leading-none;
+}
+
+.context-chip-copy small {
+  @apply text-[8px] font-extrabold uppercase tracking-[0.14em] opacity-65;
+}
+
+.context-chip-copy strong {
+  @apply mt-1 max-w-36 truncate text-[11px] font-extrabold;
+}
+
+.specialty-chip {
+  @apply border-prescript-copper/25 text-prescript-copper;
+}
+
+.specialty-chip .context-chip-icon {
+  @apply bg-prescript-copper/12;
+}
+
+.clinic-chip {
+  @apply border-prescript-primary/25 text-prescript-primary;
+}
+
+.clinic-chip .context-chip-icon {
+  @apply bg-prescript-primary/10;
+}
+
+.context-chip.is-empty {
+  @apply border-dashed opacity-70;
+}
+
+.country-selector {
+  @apply border-prescript-accent/25 text-prescript-accent;
+}
+
+.country-selector .context-chip-icon {
+  @apply bg-prescript-accent/10;
+}
+
+.country-selector select {
+  @apply mt-0.5 max-w-36 cursor-pointer appearance-none border-0 bg-transparent p-0 text-[11px] font-extrabold leading-none text-prescript-accent outline-none;
+}
+
+.country-selector:focus-within {
+  @apply ring-2 ring-prescript-accent/25;
+}
+
+.sr-only {
+  @apply absolute size-px overflow-hidden whitespace-nowrap p-0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+}
+
 .status-badge,
 .score-pill {
   @apply rounded-full bg-prescript-accent/10 px-2 py-1 text-xs font-extrabold text-prescript-accent;
-}
-
-.session-chip span:first-child {
-  @apply bg-prescript-copper/15 text-prescript-copper;
 }
 
 .icon-button {
@@ -1792,6 +1978,15 @@ dd {
 }
 
 @media (max-width: 460px) {
+  .search-result {
+    @apply grid-cols-[32px_minmax(0,1fr)];
+  }
+
+  .search-result > small,
+  .search-results-footer > span:last-child {
+    @apply hidden;
+  }
+
   .content-area {
     @apply px-2.5 py-3.5;
   }

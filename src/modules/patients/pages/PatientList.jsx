@@ -7,10 +7,11 @@ import { PageHeader } from "../../../shared/components/PageHeader";
 import { useAuth } from "../../../shared/context/useAuth";
 import { DeactivatePatientDialog } from "../components/DeactivatePatientDialog";
 import { PatientModal } from "../components/PatientModal";
+import { getCountryLocale } from "../../../shared/utils/countryUtils";
 
-const formatDate = (value) => {
+const formatDate = (value, locale) => {
   if (!value) return "Sin fecha";
-  return new Intl.DateTimeFormat("es-HN", {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -19,6 +20,7 @@ const formatDate = (value) => {
 
 export function PatientList() {
   const { user } = useAuth();
+  const locale = getCountryLocale(user?.country);
   const [patients, setPatients] = useState([]);
   const [doctorOptions, setDoctorOptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -176,7 +178,7 @@ export function PatientList() {
             <article className="table-row patient-row" key={patient.id}>
               <span>{patient.dni || "Sin DNI"}</span>
               <strong>{patient.full_name}</strong>
-              <span>{formatDate(patient.created_at)}</span>
+              <span>{formatDate(patient.created_at, locale)}</span>
               <div className="row-actions">
                 <button className="icon-button" onClick={() => openEditModal(patient)} type="button" aria-label="Modificar paciente">
                   <Edit3 size={17} aria-hidden="true" />
@@ -197,7 +199,7 @@ export function PatientList() {
       {modalState.isOpen ? (
         <PatientModal
           isOpen={modalState.isOpen}
-          country={user?.country || "HN"}
+          country={user?.country}
           doctorOptions={doctorOptions}
           mode={modalState.mode}
           onClose={closePatientModal}

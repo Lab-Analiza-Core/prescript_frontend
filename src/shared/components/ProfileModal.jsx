@@ -5,6 +5,7 @@ import { updateMeRequest } from "../../api/endpoints/auth";
 import { updateDoctorProfile } from "../../api/endpoints/doctor";
 import { PasswordInput } from "../../modules/auth/components/PasswordInput";
 import { applyNumericMask, getCountryFieldFormat, isMaskComplete, stripPhoneCountryCode } from "../utils/fieldMasks";
+import { getCountryName } from "../utils/countryUtils";
 import { useToast } from "../context/useToast";
 import { useAuth } from "../context/useAuth";
 
@@ -253,7 +254,7 @@ export function ProfileModal({ isOpen, onClose, user }) {
         <div className="profile-summary">
           <span>
             <MapPin size={16} aria-hidden="true" />
-            {user?.country || "HN"} - {user?.zone || "Centro"}
+            {getCountryName(user?.country)}{user?.zone ? ` - ${user.zone}` : ""}
           </span>
           <span>{roleLabel}</span>
           <span>{user?.company || "Prescript"}</span>

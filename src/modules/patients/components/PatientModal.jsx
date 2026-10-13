@@ -53,7 +53,11 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
   const [errorMessage, setErrorMessage] = useState("");
 
   const title = useMemo(() => (mode === "edit" ? "Modificar paciente" : "Nuevo paciente"), [mode]);
-  const fieldFormat = useMemo(() => getCountryFieldFormat(country), [country]);
+  const selectedDoctor = doctorOptions.find((doctor) => String(doctor.id) === String(form.doctor));
+  const fieldFormat = useMemo(
+    () => getCountryFieldFormat(selectedDoctor?.country || country),
+    [country, selectedDoctor?.country],
+  );
   const dniPlaceholder = useMemo(() => maskPlaceholder(fieldFormat.dniMask), [fieldFormat.dniMask]);
 
   if (!isOpen) return null;

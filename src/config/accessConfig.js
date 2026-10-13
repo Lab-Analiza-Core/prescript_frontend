@@ -19,6 +19,7 @@ export const ROLE_ALIASES = {
 
 export const normalizeRole = (role) => {
   const value = String(role || "doctor").trim();
+  if (value.toUpperCase().startsWith("ADMIN_")) return "admin";
   return ROLE_ALIASES[value.toUpperCase()] || value.toLowerCase();
 };
 

@@ -28,7 +28,7 @@ export function DashboardLayout() {
       <main className="workspace">
         <Topbar onOpenProfile={() => setIsProfileOpen(true)} onToggleSidebar={() => setIsSidebarOpen(true)} />
         <section className="content-area">
-          <div className="route-transition" key={location.pathname}>
+          <div className="route-transition" key={`${location.pathname}-${location.search}-${user?.countryCode || "all"}`}>
             <Outlet />
           </div>
         </section>

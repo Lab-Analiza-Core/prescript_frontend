@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { clearToken, getRefreshToken, getToken, setRefreshToken, setToken } from "./tokenStore";
+import { clearToken, getCountryCode, getRefreshToken, getToken, setRefreshToken, setToken } from "./tokenStore";
 
 const normalizeApiBaseUrl = (value) => {
   if (!value) return "";
@@ -28,6 +28,10 @@ api.interceptors.request.use((config) => {
   const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  const countryCode = getCountryCode();
+  if (countryCode) {
+    config.headers["X-Prescript-Country"] = countryCode;
   }
   return config;
 });

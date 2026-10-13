@@ -1,4 +1,6 @@
 import { toDateKey, today } from "../../shared/utils/calendarUtils";
+import { getCountryLocale } from "../../shared/utils/countryUtils";
+import { getCountryFieldFormat } from "../../shared/utils/fieldMasks";
 
 export const emptyAppointmentForm = {
   doctor: "",
@@ -66,21 +68,24 @@ export const hasAppointmentTimeConflict = ({ appointments, appointmentId, date, 
 
 export const getAppointmentDateKey = (appointment) => toDateKey(new Date(appointment.scheduled_at));
 
-export const toTime = (value) => {
+export const toTime = (value, locale = "es-HN") => {
   if (!value) return "";
-  return new Intl.DateTimeFormat("es-HN", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
 };
 
-export const buildWhatsAppUrl = (appointment) => {
+export const buildWhatsAppUrl = (appointment, country) => {
   const digits = String(appointment.patient_phone || "").replace(/\D/g, "");
   if (!digits) return "";
-  const phone = digits.length === 8 ? `504${digits}` : digits;
+  const { phoneCode } = getCountryFieldFormat(country);
+  const countryDigits = String(phoneCode || "").replace(/\D/g, "");
+  const phone = digits.length === 8 && countryDigits ? `${countryDigits}${digits}` : digits;
+  const locale = getCountryLocale(country);
   const message = encodeURIComponent(
-    `Recordatorio de cita: ${appointment.patient_name}, tiene cita el ${new Date(appointment.scheduled_at).toLocaleDateString("es-HN")} a las ${toTime(
-      appointment.scheduled_at,
+    `Recordatorio de cita: ${appointment.patient_name}, tiene cita el ${new Date(appointment.scheduled_at).toLocaleDateString(locale)} a las ${toTime(
+      appointment.scheduled_at, locale,
     )}.`,
   );
   return `https://wa.me/${phone}?text=${message}`;

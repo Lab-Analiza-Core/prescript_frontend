@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createUser, deactivateUser, listUsers, resetUserPassword, updateUser } from "../../../api/endpoints/users";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useToast } from "../../../shared/context/useToast";
+import { useAuth } from "../../../shared/context/useAuth";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { UserModal } from "../components/UserModal";
 import { ROLE_OPTIONS, roleLabel } from "../userConstants";
@@ -31,6 +32,7 @@ const getInitials = (user) => {
 
 export function UserManagement() {
   const { showToast } = useToast();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [filters, setFilters] = useState({ search: "", role: "", isActive: "" });
   const [showFilters, setShowFilters] = useState(false);
@@ -249,7 +251,7 @@ export function UserManagement() {
                   {roleLabel(user.primary_role)}
                 </span>
                 <span className={user.is_active ? "status-badge confirmed" : "status-badge cancelled"}>{user.is_active ? "Activo" : "Inactivo"}</span>
-                <span>{user.profile?.type || "Interno"}</span>
+                <span>{user.country?.name || user.profile?.country?.name || "Global"}</span>
                 <div className="row-actions">
                   <button className="icon-button" onClick={() => openEdit(user)} type="button" aria-label="Editar usuario">
                     <Edit3 size={17} aria-hidden="true" />
@@ -266,7 +268,17 @@ export function UserManagement() {
         </div>
       </div>
 
-      {modalState.isOpen ? <UserModal isSaving={isSaving} mode={modalState.mode} onClose={closeModal} onSubmit={saveUser} user={modalState.user} /> : null}
+      {modalState.isOpen ? (
+        <UserModal
+          canSelectGlobal={Boolean(currentUser?.isGlobalAdmin)}
+          countries={currentUser?.availableCountries || []}
+          isSaving={isSaving}
+          mode={modalState.mode}
+          onClose={closeModal}
+          onSubmit={saveUser}
+          user={modalState.user}
+        />
+      ) : null}
 
       {confirmState.type === "deactivate" ? (
         <ConfirmDialog

@@ -1,3 +1,5 @@
+import { getCountryCode } from "./countryUtils";
+
 export const COUNTRY_FIELD_FORMATS = {
   HN: {
     dniMask: "9999-9999-99999",
@@ -22,7 +24,14 @@ export const COUNTRY_FIELD_FORMATS = {
 };
 
 export const getCountryFieldFormat = (country) => {
-  const countryCode = String(country || "HN").trim().toUpperCase();
+  const countryCode = getCountryCode(country) || "HN";
+  if (country && typeof country === "object") {
+    return {
+      dniMask: country.dni_mask ?? COUNTRY_FIELD_FORMATS[countryCode]?.dniMask ?? "",
+      phoneMask: country.phone_mask ?? COUNTRY_FIELD_FORMATS[countryCode]?.phoneMask ?? "",
+      phoneCode: country.phone_code ?? COUNTRY_FIELD_FORMATS[countryCode]?.phoneCode ?? "",
+    };
+  }
   return COUNTRY_FIELD_FORMATS[countryCode] || COUNTRY_FIELD_FORMATS.HN;
 };
 

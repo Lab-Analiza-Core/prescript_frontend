@@ -31,8 +31,8 @@ export const getMonthRange = (dateKey) => {
   };
 };
 
-export const getMonthLabel = (dateKey) =>
-  new Intl.DateTimeFormat("es-HN", {
+export const getMonthLabel = (dateKey, locale = "es-HN") =>
+  new Intl.DateTimeFormat(locale, {
     month: "long",
     year: "numeric",
   }).format(parseDateKey(dateKey));
