@@ -1,7 +1,11 @@
 import {
   Activity,
+  BadgeCheck,
   BarChart3,
+  Building,
+  Building2,
   CalendarDays,
+  ClipboardList,
   FilePenLine,
   Pill,
   UserCog,
@@ -13,6 +17,7 @@ export const ROLE_ALIASES = {
   COUNTRY_MANAGER: "manager",
   DOCTOR: "doctor",
   NURSE: "nurse",
+  ORG_ADMIN: "org_admin",
   PATIENT: "patient",
   SECRETARY: "secretary",
 };
@@ -23,6 +28,7 @@ export const normalizeRole = (role) => {
   return ROLE_ALIASES[value.toUpperCase()] || value.toLowerCase();
 };
 
+// globalOnly: solo el administrador global (los administradores por pais no gestionan organizaciones).
 export const navigationItems = [
   { label: "Agenda", path: "/app/agenda", icon: CalendarDays, roles: ["doctor", "secretary"] },
   { label: "Pacientes", path: "/app/pacientes", icon: UsersRound, roles: ["doctor", "secretary", "nurse", "admin", "manager"] },
@@ -31,6 +37,10 @@ export const navigationItems = [
   { label: "Medicamentos", path: "/app/medicamentos", icon: Pill, roles: ["doctor"] },
   { label: "KPIs", path: "/app/dashboard", icon: BarChart3, roles: ["manager", "admin"] },
   { label: "Usuarios", path: "/app/usuarios", icon: UserCog, roles: ["admin"] },
+  { label: "Afiliaciones", path: "/app/afiliaciones", icon: BadgeCheck, roles: ["admin"] },
+  { label: "Organizaciones", path: "/app/organizaciones", icon: Building2, roles: ["admin"], globalOnly: true },
+  { label: "Mi organizacion", path: "/app/mi-organizacion", icon: Building, roles: ["org_admin"] },
+  { label: "Mi historial", path: "/app/mi-historial", icon: ClipboardList, roles: ["patient"] },
 ];
 
 export const routeAccess = {
@@ -42,6 +52,10 @@ export const routeAccess = {
   medicamentos: ["doctor"],
   dashboard: ["manager", "admin"],
   usuarios: ["admin"],
+  afiliaciones: ["admin"],
+  organizaciones: ["admin"],
+  "mi-organizacion": ["org_admin"],
+  "mi-historial": ["patient"],
 };
 
 export const firstRouteByRole = {
@@ -49,11 +63,19 @@ export const firstRouteByRole = {
   doctor: "/app/agenda",
   manager: "/app/dashboard",
   nurse: "/app/preclinica",
-  patient: "/app/pacientes",
+  org_admin: "/app/mi-organizacion",
+  patient: "/app/mi-historial",
   secretary: "/app/agenda",
 };
 
 export const canAccessRoute = (role, routeKey) => {
   const allowedRoles = routeAccess[routeKey] || [];
   return allowedRoles.includes(normalizeRole(role));
+};
+
+export const getVisibleNavigation = (role, { isGlobalAdmin = false } = {}) => {
+  const normalizedRole = normalizeRole(role);
+  return navigationItems.filter(
+    (item) => item.roles.includes(normalizedRole) && (!item.globalOnly || isGlobalAdmin),
+  );
 };

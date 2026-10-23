@@ -18,7 +18,7 @@ export function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const redirectTo = location.state?.from?.pathname || "/app/agenda";
+  const redirectTo = location.state?.from?.pathname || "/app";
 
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
@@ -103,7 +103,7 @@ export function Login() {
               </button>
 
               <p className="auth-switch">
-                Primer ingreso. <Link to="/activar-acceso">Crear acceso</Link>
+                Primer ingreso. <Link to="/registro">Crear cuenta</Link>
               </p>
             </form>
           </div>

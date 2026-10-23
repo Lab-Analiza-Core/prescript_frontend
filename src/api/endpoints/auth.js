@@ -8,35 +8,6 @@ export async function loginRequest({ email, password, username }) {
   return response.data;
 }
 
-export async function activateDoctorRequest({ identifier, email, password, passwordConfirm }) {
-  const response = await api.post("/auth/doctor/activate", {
-    identifier,
-    email,
-    password,
-    password_confirm: passwordConfirm,
-  });
-  return response.data;
-}
-
-export async function activateAccessRequest({ role, identifier, email, password, passwordConfirm }) {
-  const response = await api.post("/auth/access/activate", {
-    role,
-    identifier,
-    email,
-    password,
-    password_confirm: passwordConfirm,
-  });
-  return response.data;
-}
-
-export async function validateAccessIdentifierRequest({ role, identifier }) {
-  const response = await api.post("/auth/access/validate", {
-    role,
-    identifier,
-  });
-  return response.data;
-}
-
 export async function meRequest() {
   const response = await api.get("/auth/me");
   return response.data;

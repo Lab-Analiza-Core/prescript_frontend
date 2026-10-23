@@ -1,5 +1,6 @@
 import { CalendarCheck, CalendarX2, UserX, X } from "lucide-react";
 
+import { ExternalBadge } from "../../../shared/components/ExternalBadge";
 import { toTime } from "../appointmentUtils";
 
 const ACTION_CONTENT = {
@@ -70,6 +71,7 @@ export function AppointmentStatusDialog({ action, isProcessing, locale, onClose,
             <strong>{appointment.patient_name}</strong>
             <span>{formattedDate} · {toTime(appointment.scheduled_at, locale)}</span>
             <small>{appointment.doctor_name}</small>
+            {appointment.doctor_is_external ? <ExternalBadge /> : null}
           </div>
         </div>
         <div className="confirm-actions">

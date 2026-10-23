@@ -7,6 +7,7 @@ import {
   UserX,
 } from "lucide-react";
 
+import { ExternalBadge } from "../../../shared/components/ExternalBadge";
 import {
   ACTIVE_APPOINTMENT_STATUSES,
   isAppointmentPastDue,
@@ -49,6 +50,7 @@ export function AppointmentRow({
         <strong>{appointment.patient_name}</strong>
         <span>{appointment.reason || appointment.doctor_name}</span>
         {showDate && appointment.reason ? <small>{appointment.doctor_name}</small> : null}
+        {appointment.doctor_is_external ? <ExternalBadge /> : null}
       </div>
       <div className="appointment-actions">
         <span className={`status-badge ${isPendingClosure ? "pending" : statusTone[appointment.status] || ""}`}>

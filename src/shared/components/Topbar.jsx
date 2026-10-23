@@ -1,6 +1,7 @@
 import { Building2, Globe2, LogOut, Menu, Stethoscope, UserRound } from "lucide-react";
 
 import { useAuth } from "../context/useAuth";
+import { ExternalBadge } from "./ExternalBadge";
 import { GlobalSearch } from "./GlobalSearch";
 
 function getContextLabel(item) {
@@ -18,6 +19,11 @@ function summarizeContext(items, emptyLabel) {
   };
 }
 
+const ROLE_DISPLAY = { ORG_ADMIN: "Admin. de organizacion", PATIENT: "Paciente" };
+
+// Pacientes y administradores de organizacion no tienen datos clinicos que buscar.
+const HAS_CLINICAL_SEARCH = new Set(["doctor", "secretary", "nurse", "admin", "manager"]);
+
 export function Topbar({ onOpenProfile, onToggleSidebar }) {
   const { logout, selectCountry, user } = useAuth();
   const specialty = summarizeContext(user?.doctorProfile?.specialties, "Sin especialidad");
@@ -29,7 +35,11 @@ export function Topbar({ onOpenProfile, onToggleSidebar }) {
         <Menu size={20} aria-hidden="true" />
       </button>
 
-      <GlobalSearch country={user?.country} countryCode={user?.countryCode} />
+      {HAS_CLINICAL_SEARCH.has(user?.role) ? (
+        <GlobalSearch country={user?.country} countryCode={user?.countryCode} />
+      ) : (
+        <div className="topbar-spacer" />
+      )}
 
       <div className="session-chip">
         {user?.doctorProfile ? (
@@ -65,11 +75,20 @@ export function Topbar({ onOpenProfile, onToggleSidebar }) {
         ) : null}
       </div>
 
-      <button className="profile-trigger" onClick={onOpenProfile} type="button" aria-label="Abrir perfil de usuario">
-        <UserRound size={18} aria-hidden="true" />
-        <span className="user-text">
+      <button
+        aria-label="Abrir perfil de usuario"
+        className="profile-trigger user-chip"
+        onClick={onOpenProfile}
+        title={user?.displayName || user?.name}
+        type="button"
+      >
+        <span className="context-chip-icon"><UserRound size={15} aria-hidden="true" /></span>
+        <span className="context-chip-copy">
+          <span className="user-chip-meta">
+            <small>{ROLE_DISPLAY[user?.roleLabel] || user?.roleLabel || user?.role}</small>
+            {user?.isExternal ? <ExternalBadge /> : null}
+          </span>
           <strong>{user?.displayName || user?.name}</strong>
-          <small>{user?.roleLabel || user?.role}</small>
         </span>
       </button>
 

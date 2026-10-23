@@ -1,11 +1,10 @@
 import { Stethoscope } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
-import { navigationItems, normalizeRole } from "../../config/accessConfig";
+import { getVisibleNavigation } from "../../config/accessConfig";
 
-export function Sidebar({ onNavigate, role }) {
-  const normalizedRole = normalizeRole(role);
-  const items = navigationItems.filter((item) => item.roles.includes(normalizedRole));
+export function Sidebar({ isGlobalAdmin = false, onNavigate, role }) {
+  const items = getVisibleNavigation(role, { isGlobalAdmin });
 
   return (
     <aside className="sidebar">

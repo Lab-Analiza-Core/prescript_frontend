@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LoaderCircle, Mail, MapPin, Phone, Save, Stethoscope, UserRound, X } from "lucide-react";
 
 import { updateMeRequest } from "../../api/endpoints/auth";
+import { ExternalBadge } from "./ExternalBadge";
 import { updateDoctorProfile } from "../../api/endpoints/doctor";
 import { PasswordInput } from "../../modules/auth/components/PasswordInput";
 import { applyNumericMask, getCountryFieldFormat, isMaskComplete, stripPhoneCountryCode } from "../utils/fieldMasks";
@@ -12,6 +13,8 @@ import { useAuth } from "../context/useAuth";
 const ROLE_LABELS = {
   DOCTOR: "Doctor",
   NURSE: "Enfermera",
+  ORG_ADMIN: "Admin. de organizacion",
+  PATIENT: "Paciente",
   SECRETARY: "Secretaria",
   ADMIN: "Admin",
   COUNTRY_MANAGER: "Gerente",
@@ -257,7 +260,8 @@ export function ProfileModal({ isOpen, onClose, user }) {
             {getCountryName(user?.country)}{user?.zone ? ` - ${user.zone}` : ""}
           </span>
           <span>{roleLabel}</span>
-          <span>{user?.company || "Prescript"}</span>
+          <span>{user?.organization?.name || user?.company || "Prescript"}</span>
+          {user?.isExternal ? <ExternalBadge /> : null}
           {user?.doctorProfile?.qualification_code ? <span>{user.doctorProfile.qualification_code}</span> : null}
         </div>
 

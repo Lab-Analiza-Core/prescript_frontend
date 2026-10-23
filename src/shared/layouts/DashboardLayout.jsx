@@ -15,7 +15,7 @@ export function DashboardLayout() {
   return (
     <div className="app-shell">
       <div className={isSidebarOpen ? "sidebar-layer open" : "sidebar-layer"}>
-        <Sidebar onNavigate={() => setIsSidebarOpen(false)} role={user?.role || "doctor"} />
+        <Sidebar isGlobalAdmin={Boolean(user?.isGlobalAdmin)} onNavigate={() => setIsSidebarOpen(false)} role={user?.role || "doctor"} />
       </div>
 
       <button

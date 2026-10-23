@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { activateAccessRequest, activateDoctorRequest, loginRequest, meRequest } from "../../api/endpoints/auth";
+import { loginRequest, meRequest } from "../../api/endpoints/auth";
+import { activateAffiliationRequest, registerExternalRequest } from "../../api/endpoints/onboarding";
 import { clearToken, getToken, setCountryCode, setToken } from "../../api/tokenStore";
 import { setRefreshToken } from "../../api/tokenStore";
 import { normalizeRole } from "../../config/accessConfig";
@@ -30,6 +31,10 @@ const normalizeUser = (payload) => {
     doctorProfile: payload.doctor_profile,
     secretaryProfile: payload.secretary_profile,
     nurseProfile: payload.nurse_profile,
+    organization: payload.organization || null,
+    isExternal: Boolean(payload.is_external),
+    orgAdminProfile: payload.org_admin_profile || null,
+    patientProfile: payload.patient_profile || null,
   };
 };
 
@@ -79,35 +84,38 @@ export function AuthProvider({ children }) {
     };
   }, [applyUserPayload, token]);
 
+  // Guarda los tokens recibidos y carga el perfil; es el paso comun de login, activacion y registro.
+  const startSession = useCallback(async (tokens) => {
+    setToken(tokens.access);
+    setRefreshToken(tokens.refresh);
+    setAccessToken(tokens.access);
+
+    const payload = await meRequest();
+    return applyUserPayload(payload);
+  }, [applyUserPayload]);
+
   const login = useCallback(async ({ email, password, username }) => {
     const tokens = await loginRequest({ email, username, password });
-    setToken(tokens.access);
-    setRefreshToken(tokens.refresh);
-    setAccessToken(tokens.access);
+    await startSession(tokens);
+  }, [startSession]);
 
-    const payload = await meRequest();
-    applyUserPayload(payload);
-  }, [applyUserPayload]);
+  // Con revision manual no hay tokens: la cuenta queda inactiva hasta que un administrador la apruebe.
+  const activateAffiliation = useCallback(async (payload) => {
+    const result = await activateAffiliationRequest(payload);
+    if (result.access && result.refresh) {
+      await startSession(result);
+    }
+    return result;
+  }, [startSession]);
 
-  const activateDoctor = useCallback(async ({ identifier, email, password, passwordConfirm }) => {
-    const tokens = await activateDoctorRequest({ identifier, email, password, passwordConfirm });
-    setToken(tokens.access);
-    setRefreshToken(tokens.refresh);
-    setAccessToken(tokens.access);
-
-    const payload = await meRequest();
-    applyUserPayload(payload);
-  }, [applyUserPayload]);
-
-  const activateAccess = useCallback(async ({ role, identifier, email, password, passwordConfirm }) => {
-    const tokens = await activateAccessRequest({ role, identifier, email, password, passwordConfirm });
-    setToken(tokens.access);
-    setRefreshToken(tokens.refresh);
-    setAccessToken(tokens.access);
-
-    const payload = await meRequest();
-    applyUserPayload(payload);
-  }, [applyUserPayload]);
+  // Un administrador de organizacion queda pendiente de aprobacion y no recibe tokens.
+  const registerExternal = useCallback(async (payload) => {
+    const result = await registerExternalRequest(payload);
+    if (result.access && result.refresh) {
+      await startSession(result);
+    }
+    return result;
+  }, [startSession]);
 
   const refreshUser = useCallback(async () => {
     const payload = await meRequest();
@@ -130,15 +138,25 @@ export function AuthProvider({ children }) {
     () => ({
       isAuthenticated: Boolean(token),
       isInitializing,
-      activateDoctor,
-      activateAccess,
+      activateAffiliation,
       login,
       logout,
       refreshUser,
+      registerExternal,
       selectCountry,
       user,
     }),
-    [activateAccess, activateDoctor, isInitializing, login, logout, refreshUser, selectCountry, token, user],
+    [
+      activateAffiliation,
+      isInitializing,
+      login,
+      logout,
+      refreshUser,
+      registerExternal,
+      selectCountry,
+      token,
+      user,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
