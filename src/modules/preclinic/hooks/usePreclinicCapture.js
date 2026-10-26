@@ -5,7 +5,7 @@ import {
   listPreclinicPatients,
   savePreclinicPatientVitals,
   savePreclinicVitals,
-} from "../../../api/endpoints/preclinic";
+} from "../services/preclinicService";
 import {
   getCalendarDays,
   moveMonth,
@@ -32,37 +32,44 @@ export function usePreclinicCapture() {
 
   useEffect(() => {
     let isMounted = true;
-    Promise.all([
-      listPreclinicAppointments(selectedDate),
-      listPreclinicPatients({ date: selectedDate, search: patientSearch }),
-    ])
-      .then(([appointmentPayload, patientPayload]) => {
-        if (!isMounted) return;
-        const appointmentRows = Array.isArray(appointmentPayload) ? appointmentPayload : [];
-        const patientRows = Array.isArray(patientPayload) ? patientPayload : [];
-        const nextSelection = appointmentRows[0] ? { ...appointmentRows[0], source: "appointment" } : patientRows[0] || null;
-        setAppointments(appointmentRows);
-        setPatients(patientRows);
-        setSelectedSource(nextSelection ? { type: nextSelection.source || "appointment", id: String(nextSelection.id) } : { type: "", id: "" });
-        setForm(nextSelection ? buildVitalsForm(nextSelection) : emptyVitals);
-      })
-      .catch(() => {
-        if (isMounted) {
-          setAppointments([]);
-          setPatients([]);
-          setSelectedSource({ type: "", id: "" });
-          setForm(emptyVitals);
-          setErrorMessage("No se pudo cargar preclinica.");
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      });
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      setIsLoading(true);
+      Promise.all([
+        listPreclinicAppointments(selectedDate, { signal: controller.signal }),
+        listPreclinicPatients({ date: selectedDate, search: patientSearch, signal: controller.signal }),
+      ])
+        .then(([appointmentPayload, patientPayload]) => {
+          if (!isMounted) return;
+          const appointmentRows = Array.isArray(appointmentPayload) ? appointmentPayload : [];
+          const patientRows = Array.isArray(patientPayload) ? patientPayload : [];
+          const nextSelection = appointmentRows[0] ? { ...appointmentRows[0], source: "appointment" } : patientRows[0] || null;
+          setAppointments(appointmentRows);
+          setPatients(patientRows);
+          setSelectedSource(nextSelection ? { type: nextSelection.source || "appointment", id: String(nextSelection.id) } : { type: "", id: "" });
+          setForm(nextSelection ? buildVitalsForm(nextSelection) : emptyVitals);
+          setErrorMessage("");
+        })
+        .catch((error) => {
+          if (isMounted && error.code !== "ERR_CANCELED") {
+            setAppointments([]);
+            setPatients([]);
+            setSelectedSource({ type: "", id: "" });
+            setForm(emptyVitals);
+            setErrorMessage("No se pudo cargar preclinica.");
+          }
+        })
+        .finally(() => {
+          if (isMounted && !controller.signal.aborted) {
+            setIsLoading(false);
+          }
+        });
+    }, 300);
 
     return () => {
       isMounted = false;
+      window.clearTimeout(timer);
+      controller.abort();
     };
   }, [selectedDate, patientSearch]);
 

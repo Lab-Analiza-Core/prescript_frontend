@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { loginRequest, meRequest } from "../../api/endpoints/auth";
-import { activateAffiliationRequest, registerExternalRequest } from "../../api/endpoints/onboarding";
-import { clearToken, getToken, setCountryCode, setToken } from "../../api/tokenStore";
-import { setRefreshToken } from "../../api/tokenStore";
+import { loginRequest, meRequest } from "../../modules/auth/services/authService";
+import { activateAffiliationRequest, registerExternalRequest } from "../../modules/auth/services/registrationService";
+import {
+  clearToken,
+  getCountryCode,
+  getToken,
+  setCountryCode,
+  setRefreshToken,
+  setToken,
+  subscribeToSessionClear,
+} from "../../api/tokenStore";
 import { normalizeRole } from "../../config/accessConfig";
 import { AuthContext } from "./authContextObject";
 
@@ -42,6 +49,16 @@ export function AuthProvider({ children }) {
   const [token, setAccessToken] = useState(getToken());
   const [user, setUser] = useState(null);
   const [isInitializing, setIsInitializing] = useState(Boolean(token));
+
+  useEffect(
+    () =>
+      subscribeToSessionClear(() => {
+        setAccessToken(null);
+        setUser(null);
+        setIsInitializing(false);
+      }),
+    [],
+  );
 
   const applyUserPayload = useCallback((payload) => {
     const normalized = normalizeUser(payload);
@@ -88,10 +105,15 @@ export function AuthProvider({ children }) {
   const startSession = useCallback(async (tokens) => {
     setToken(tokens.access);
     setRefreshToken(tokens.refresh);
-    setAccessToken(tokens.access);
-
-    const payload = await meRequest();
-    return applyUserPayload(payload);
+    try {
+      const payload = await meRequest();
+      const normalized = applyUserPayload(payload);
+      setAccessToken(getToken());
+      return normalized;
+    } catch (error) {
+      clearToken();
+      throw error;
+    }
   }, [applyUserPayload]);
 
   const login = useCallback(async ({ email, password, username }) => {
@@ -123,9 +145,17 @@ export function AuthProvider({ children }) {
   }, [applyUserPayload]);
 
   const selectCountry = useCallback(async (countryCode) => {
+    const previousCountryCode = getCountryCode();
     setCountryCode(countryCode);
-    const payload = await meRequest();
-    return applyUserPayload(payload);
+    try {
+      const payload = await meRequest();
+      return applyUserPayload(payload);
+    } catch (error) {
+      if (getToken()) {
+        setCountryCode(previousCountryCode);
+      }
+      throw error;
+    }
   }, [applyUserPayload]);
 
   const logout = useCallback(() => {

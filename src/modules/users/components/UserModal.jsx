@@ -2,6 +2,7 @@ import { UserRound, X } from "lucide-react";
 import { useState } from "react";
 
 import { ROLE_OPTIONS } from "../userConstants";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const emptyForm = {
   username: "",
@@ -28,7 +29,7 @@ const getInitialForm = (user) =>
         is_staff: Boolean(user.is_staff),
         country_code: user.country?.code || "",
       }
-    : emptyForm;
+    : { ...emptyForm };
 
 export function UserModal({ canSelectGlobal = false, countries = [], isSaving, mode, onClose, onSubmit, user }) {
   const [form, setForm] = useState(() => {
@@ -38,7 +39,9 @@ export function UserModal({ canSelectGlobal = false, countries = [], isSaving, m
     }
     return initialForm;
   });
+  const [rolesError, setRolesError] = useState("");
   const isEditing = mode === "edit";
+  const needsCountry = form.roles.some((role) => role !== "ADMIN");
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -49,10 +52,15 @@ export function UserModal({ canSelectGlobal = false, countries = [], isSaving, m
       const roles = current.roles.includes(role) ? current.roles.filter((item) => item !== role) : [...current.roles, role];
       return { ...current, roles };
     });
+    setRolesError("");
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!form.roles.length) {
+      setRolesError("Selecciona al menos un rol.");
+      return;
+    }
     const payload = {
       ...form,
       username: form.username || form.email,
@@ -83,20 +91,20 @@ export function UserModal({ canSelectGlobal = false, countries = [], isSaving, m
 
         <form className="modal-form user-form" id="user-form" onSubmit={handleSubmit}>
           <label>
-            <span>Nombre</span>
-            <input value={form.first_name} onChange={(event) => updateField("first_name", event.target.value)} />
+            <span>Nombre *</span>
+            <input maxLength={150} required value={form.first_name} onChange={(event) => updateField("first_name", event.target.value)} />
           </label>
           <label>
-            <span>Apellido</span>
-            <input value={form.last_name} onChange={(event) => updateField("last_name", event.target.value)} />
+            <span>Apellido *</span>
+            <input maxLength={150} required value={form.last_name} onChange={(event) => updateField("last_name", event.target.value)} />
           </label>
           <label>
-            <span>Correo</span>
-            <input required type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} />
+            <span>Correo *</span>
+            <input maxLength={254} required type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} />
           </label>
           <label>
             <span>Usuario</span>
-            <input value={form.username} onChange={(event) => updateField("username", event.target.value)} placeholder="Usa el correo si se deja vacio" />
+            <input maxLength={150} pattern="[\w.@+\-]+" title="Solo letras, numeros y @ . + - _" value={form.username} onChange={(event) => updateField("username", event.target.value)} placeholder="Usa el correo si se deja vacio" />
           </label>
           <label className="field-wide">
             <span>{isEditing ? "Nueva contrasena" : "Contrasena temporal"}</span>
@@ -111,13 +119,14 @@ export function UserModal({ canSelectGlobal = false, countries = [], isSaving, m
           </label>
 
           <label className="field-wide">
-            <span>Pais de acceso</span>
-            <select value={form.country_code} onChange={(event) => updateField("country_code", event.target.value)}>
-              {canSelectGlobal ? <option value="">Global (solo administrador maestro)</option> : null}
+            <span>Pais de acceso{needsCountry ? " *" : ""}</span>
+            <SearchSelect required={needsCountry} value={form.country_code} onChange={(event) => updateField("country_code", event.target.value)}>
+              {needsCountry ? <option value="">Selecciona un pais</option> : null}
+              {!needsCountry && canSelectGlobal ? <option value="">Global (solo administrador maestro)</option> : null}
               {countries.map((country) => (
                 <option key={country.code} value={country.code}>{country.name}</option>
               ))}
-            </select>
+            </SearchSelect>
           </label>
 
           <div className="field-wide user-role-grid" role="group" aria-label="Roles de usuario">
@@ -128,6 +137,7 @@ export function UserModal({ canSelectGlobal = false, countries = [], isSaving, m
               </label>
             ))}
           </div>
+          {rolesError ? <p className="field-wide form-error" role="alert">{rolesError}</p> : null}
 
           <label className="user-toggle">
             <input checked={form.is_active} onChange={(event) => updateField("is_active", event.target.checked)} type="checkbox" />

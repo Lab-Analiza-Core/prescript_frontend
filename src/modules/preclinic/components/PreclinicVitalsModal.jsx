@@ -19,6 +19,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { medicalListFromText } from "../preclinicUtils";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const hasRecordedValue = (value) => value !== null && value !== undefined && value !== "";
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -251,12 +252,12 @@ export function PreclinicVitalsModal({
 
                 <label className="medical-profile-field medical-blood-type">
                   <span>Tipo de sangre</span>
-                  <select name="blood_type" onChange={onChange} value={form.blood_type}>
+                  <SearchSelect name="blood_type" onChange={onChange} value={form.blood_type}>
                     <option value="">Sin especificar</option>
                     {BLOOD_TYPES.map((bloodType) => (
                       <option key={bloodType} value={bloodType}>{bloodType}</option>
                     ))}
-                  </select>
+                  </SearchSelect>
                   <small>Seleccione el grupo y factor Rh si están confirmados.</small>
                 </label>
 

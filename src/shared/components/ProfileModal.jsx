@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { LoaderCircle, Mail, MapPin, Phone, Save, Stethoscope, UserRound, X } from "lucide-react";
 
-import { updateMeRequest } from "../../api/endpoints/auth";
+import { updateMeRequest } from "../../modules/auth/services/authService";
 import { ExternalBadge } from "./ExternalBadge";
-import { updateDoctorProfile } from "../../api/endpoints/doctor";
+import { updateDoctorProfile } from "../services/doctorService";
 import { PasswordInput } from "../../modules/auth/components/PasswordInput";
 import { applyNumericMask, getCountryFieldFormat, isMaskComplete, stripPhoneCountryCode } from "../utils/fieldMasks";
 import { getCountryName } from "../utils/countryUtils";
@@ -59,6 +59,7 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
   const { refreshUser } = useAuth();
   const { showToast } = useToast();
   const [visiblePasswords, setVisiblePasswords] = useState({
+    currentPassword: false,
     newPassword: false,
     passwordConfirm: false,
   });
@@ -66,6 +67,7 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
     phone: activeProfile.phone || "",
     email: activeProfile.public_email || activeProfile.email || user?.email || "",
     preferences: getPreferencesText(user?.doctorProfile?.preferences),
+    currentPassword: "",
     newPassword: "",
     passwordConfirm: "",
   });
@@ -95,9 +97,11 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
     event.preventDefault();
     setIsSaving(true);
 
+    const wantsPasswordChange = Boolean(form.currentPassword || form.newPassword || form.passwordConfirm);
     const passwordPayload =
-      form.newPassword || form.passwordConfirm
+      wantsPasswordChange
         ? {
+            current_password: form.currentPassword,
             new_password: form.newPassword,
             password_confirm: form.passwordConfirm,
           }
@@ -106,6 +110,12 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
     try {
       if (form.phone && !isMaskComplete(form.phone, fieldFormat.phoneMask)) {
         throw new Error(`El telefono debe seguir el formato ${fieldFormat.phoneMask}.`);
+      }
+
+      if (wantsPasswordChange) {
+        if (!form.currentPassword) throw new Error("Ingrese su contrasena actual.");
+        if (form.newPassword.length < 8) throw new Error("La nueva contrasena debe tener al menos 8 caracteres.");
+        if (form.newPassword !== form.passwordConfirm) throw new Error("Las contrasenas no coinciden.");
       }
 
       await updateMeRequest({
@@ -125,6 +135,7 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
       await refreshUser();
       setForm((current) => ({
         ...current,
+        currentPassword: "",
         newPassword: "",
         passwordConfirm: "",
       }));
@@ -190,6 +201,18 @@ function ProfileForm({ activeProfile, isDoctor, onClose, user }) {
       <div className="profile-form-section field-wide">
         <span>Contrasena</span>
       </div>
+
+      <label className="field-wide">
+        <span>Contrasena actual</span>
+        <PasswordInput
+          autoComplete="current-password"
+          isVisible={visiblePasswords.currentPassword}
+          name="currentPassword"
+          onChange={handleChange}
+          onToggleVisibility={() => togglePasswordVisibility("currentPassword")}
+          value={form.currentPassword}
+        />
+      </label>
 
       <label>
         <span>Nueva contrasena</span>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { CalendarDays, FilePenLine, LoaderCircle, MailCheck, ShieldCheck, UserRound } from "lucide-react";
 
-import { getPatientHistory, requestPatientHistoryCode, verifyPatientHistory } from "../../../api/endpoints/onboarding";
+import { getPatientHistory, requestPatientHistoryCode, verifyPatientHistory } from "../services/patientHistoryService";
+import { PagedList } from "../../../shared/components/PagedList";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useAuth } from "../../../shared/context/useAuth";
 import { useToast } from "../../../shared/context/useToast";
@@ -141,43 +142,52 @@ export function MyHistory() {
       {isVerified && history ? (
         <div className="history-grid">
           <HistorySection count={history.records.length} icon={UserRound} title="Fichas clinicas">
-            {history.records.map((record) => (
-              <article className="history-item" key={record.id}>
-                <strong>
-                  {record.first_name} {record.last_name}
-                </strong>
-                <small>{[record.doctor_name, record.organization].filter(Boolean).join(" · ")}</small>
-              </article>
-            ))}
+            <PagedList
+              items={history.records}
+              renderItem={(record) => (
+                <article className="history-item" key={record.id}>
+                  <strong>
+                    {record.first_name} {record.last_name}
+                  </strong>
+                  <small>{[record.doctor_name, record.organization].filter(Boolean).join(" · ")}</small>
+                </article>
+              )}
+            />
           </HistorySection>
 
           <HistorySection count={history.appointments.length} icon={CalendarDays} title="Citas">
-            {history.appointments.map((appointment) => (
-              <article className="history-item" key={appointment.id}>
-                <strong>{formatDate(appointment.scheduled_at)}</strong>
-                <small>
-                  {[appointment.doctor_name, appointment.reason].filter(Boolean).join(" · ")}
-                </small>
-                <span className="status-badge">{STATUS_LABELS[appointment.status] || appointment.status}</span>
-              </article>
-            ))}
+            <PagedList
+              items={history.appointments}
+              renderItem={(appointment) => (
+                <article className="history-item" key={appointment.id}>
+                  <strong>{formatDate(appointment.scheduled_at)}</strong>
+                  <small>
+                    {[appointment.doctor_name, appointment.reason].filter(Boolean).join(" · ")}
+                  </small>
+                  <span className="status-badge">{STATUS_LABELS[appointment.status] || appointment.status}</span>
+                </article>
+              )}
+            />
           </HistorySection>
 
           <HistorySection count={history.prescriptions.length} icon={FilePenLine} title="Recetas">
-            {history.prescriptions.map((prescription) => (
-              <article className="history-item" key={prescription.id}>
-                <strong>{formatDate(prescription.created_at)}</strong>
-                <small>{[prescription.doctor_name, prescription.diagnosis].filter(Boolean).join(" · ")}</small>
-                <ul className="history-items">
-                  {prescription.items.map((item, index) => (
-                    <li key={`${prescription.id}-${index}`}>
-                      <strong>{item.medicine}</strong> — {item.dosage}, {item.frequency}, {item.duration}
-                      {item.instructions ? <small>{item.instructions}</small> : null}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
+            <PagedList
+              items={history.prescriptions}
+              renderItem={(prescription) => (
+                <article className="history-item" key={prescription.id}>
+                  <strong>{formatDate(prescription.created_at)}</strong>
+                  <small>{[prescription.doctor_name, prescription.diagnosis].filter(Boolean).join(" · ")}</small>
+                  <ul className="history-items">
+                    {prescription.items.map((item, index) => (
+                      <li key={`${prescription.id}-${index}`}>
+                        <strong>{item.medicine}</strong> — {item.dosage}, {item.frequency}, {item.duration}
+                        {item.instructions ? <small>{item.instructions}</small> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              )}
+            />
           </HistorySection>
         </div>
       ) : null}

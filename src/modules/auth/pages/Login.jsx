@@ -4,10 +4,12 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 
 import { PasswordInput } from "../components/PasswordInput";
 import { useAuth } from "../../../shared/context/useAuth";
+import { useTheme } from "../../../shared/context/useTheme";
 import { useToast } from "../../../shared/context/useToast";
 
 export function Login() {
   const { isAuthenticated, login } = useAuth();
+  const { logo } = useTheme();
   const { showToast } = useToast();
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,7 +58,9 @@ export function Login() {
         <span>TRIAGE</span>
       </div>
       <div className="auth-login-stage">
-        <section className="login-identity" aria-hidden="true" />
+        <section className="login-identity" aria-hidden="true">
+          {logo ? <img className="login-logo" src={logo} alt="" /> : null}
+        </section>
 
         <section className="auth-panel login-auth-panel" aria-label="Inicio de sesion">
           <div className="login-auth-content">

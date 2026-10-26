@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { FilePlus2 } from "lucide-react";
 
-import { listTermsVersions, publishTerms } from "../../../api/endpoints/organizations";
+import { listTermsVersions, publishTerms } from "../services/organizationService";
+import { Pagination } from "../../../shared/components/Pagination";
 import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { usePagedRows } from "../../../shared/hooks/usePagedResource";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 
@@ -15,6 +17,7 @@ export function TermsPanel() {
   const [isSaving, setIsSaving] = useState(false);
   const versions = Array.isArray(data) ? data : data?.results || [];
   const current = versions.find((version) => version.is_current);
+  const paged = usePagedRows(versions);
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -79,7 +82,7 @@ export function TermsPanel() {
         </div>
         {isLoading && !data ? <div className="empty-state">Cargando versiones</div> : null}
         {error ? <div className="empty-state">{getApiErrorMessage(error, "No se pudieron cargar las versiones.")}</div> : null}
-        {versions.map((version) => (
+        {paged.rows.map((version) => (
           <article className="table-row admin-row" key={version.id} style={{ "--cols": "0.6fr 1.6fr 1fr 0.7fr" }}>
             <strong>{version.version}</strong>
             <span>{version.title}</span>
@@ -89,6 +92,7 @@ export function TermsPanel() {
             </span>
           </article>
         ))}
+        <Pagination onPageChange={paged.setPage} page={paged.page} total={paged.total} />
       </div>
     </div>
   );

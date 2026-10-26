@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Power, Search } from "lucide-react";
 
-import { listMembers, setMemberActive } from "../../../api/endpoints/organizations";
+import { listMembers, setMemberActive } from "../services/organizationService";
 import { ExternalBadge } from "../../../shared/components/ExternalBadge";
-import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { Pagination } from "../../../shared/components/Pagination";
+import { usePagedResource } from "../../../shared/hooks/usePagedResource";
 import { useAuth } from "../../../shared/context/useAuth";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { ConfirmDialog } from "../../users/components/ConfirmDialog";
 import { MEMBER_ROLE_FILTERS, ROLE_LABELS } from "../organizationConstants";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const COLUMNS = "minmax(200px,1.6fr) 1fr 0.7fr 80px";
 
@@ -21,8 +23,8 @@ export function MembersPanel({ canManageAdmins = false, organizationId }) {
   const [target, setTarget] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data, error, isLoading, reload } = useApiResource(
-    () => listMembers({ organization: organizationId, search: appliedSearch, role }),
+  const { data, error, isLoading, page, reload, setPage, total } = usePagedResource(
+    (pageNumber) => listMembers({ organization: organizationId, search: appliedSearch, role, page: pageNumber }),
     `members-${organizationId}-${appliedSearch}-${role}`,
   );
   const members = data || [];
@@ -59,14 +61,14 @@ export function MembersPanel({ canManageAdmins = false, organizationId }) {
             value={search}
           />
         </div>
-        <select aria-label="Filtrar por rol" onChange={(event) => setRole(event.target.value)} value={role}>
+        <SearchSelect aria-label="Filtrar por rol" onChange={(event) => setRole(event.target.value)} value={role}>
           <option value="">Todos los roles</option>
           {MEMBER_ROLE_FILTERS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
-        </select>
+        </SearchSelect>
         <button className="secondary-action compact" onClick={() => setAppliedSearch(search.trim())} type="button">
           Buscar
         </button>
@@ -112,6 +114,7 @@ export function MembersPanel({ canManageAdmins = false, organizationId }) {
             </div>
           </article>
         ))}
+        <Pagination isLoading={isLoading} onPageChange={setPage} page={page} total={total} />
       </div>
 
       {target ? (

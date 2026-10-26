@@ -1,5 +1,6 @@
 import { CalendarClock, ChevronLeft, ChevronRight } from "lucide-react";
 
+import { PagedList } from "../../../shared/components/PagedList";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import {
   getMonthLabel,
@@ -149,34 +150,44 @@ export function PreclinicCapture() {
           {!isLoading && totalRecords === 0 ? <div className="empty-state">Sin registros para esta fecha</div> : null}
 
           {!isLoading && appointments.length ? <div className="preclinic-section-title">Citas de la fecha</div> : null}
-          {!isLoading &&
-            appointments.map((appointment) => (
-              <button
-                className={selectedSource.type === "appointment" && String(appointment.id) === selectedSource.id ? "preclinic-appointment active" : "preclinic-appointment"}
-                key={`appointment-${appointment.id}`}
-                onClick={() => selectRecord("appointment", appointment)}
-                type="button"
-              >
-                <span>{formatTime(appointment.scheduled_at, locale)}</span>
-                <strong>{appointment.patient_name}</strong>
-                <small>{appointment.patient_dni ? `DNI ${appointment.patient_dni}` : `Paciente #${appointment.patient}`}</small>
-              </button>
-            ))}
+          {!isLoading ? (
+            <PagedList
+              items={appointments}
+              renderItem={(appointment) => (
+                <button
+                  className={selectedSource.type === "appointment" && String(appointment.id) === selectedSource.id ? "preclinic-appointment active" : "preclinic-appointment"}
+                  key={`appointment-${appointment.id}`}
+                  onClick={() => selectRecord("appointment", appointment)}
+                  type="button"
+                >
+                  <span>{formatTime(appointment.scheduled_at, locale)}</span>
+                  <strong>{appointment.patient_name}</strong>
+                  <small>{appointment.patient_dni ? `DNI ${appointment.patient_dni}` : `Paciente #${appointment.patient}`}</small>
+                </button>
+              )}
+              resetKey={selectedDate}
+            />
+          ) : null}
 
           {!isLoading && patients.length ? <div className="preclinic-section-title">Pacientes registrados</div> : null}
-          {!isLoading &&
-            patients.map((patient) => (
-              <button
-                className={selectedSource.type === "patient" && String(patient.id) === selectedSource.id ? "preclinic-appointment active" : "preclinic-appointment"}
-                key={`patient-${patient.id}`}
-                onClick={() => selectRecord("patient", patient)}
-                type="button"
-              >
-                <span>#{patient.patient}</span>
-                <strong>{patient.patient_name}</strong>
-                <small>{patient.patient_dni ? `DNI ${patient.patient_dni}` : patient.doctor_name}</small>
-              </button>
-            ))}
+          {!isLoading ? (
+            <PagedList
+              items={patients}
+              renderItem={(patient) => (
+                <button
+                  className={selectedSource.type === "patient" && String(patient.id) === selectedSource.id ? "preclinic-appointment active" : "preclinic-appointment"}
+                  key={`patient-${patient.id}`}
+                  onClick={() => selectRecord("patient", patient)}
+                  type="button"
+                >
+                  <span>#{patient.patient}</span>
+                  <strong>{patient.patient_name}</strong>
+                  <small>{patient.patient_dni ? `DNI ${patient.patient_dni}` : patient.doctor_name}</small>
+                </button>
+              )}
+              resetKey={`${selectedDate}|${patientSearch}`}
+            />
+          ) : null}
         </section>
       </div>
 

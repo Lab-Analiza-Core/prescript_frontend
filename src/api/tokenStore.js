@@ -1,38 +1,72 @@
 const ACCESS_TOKEN_KEY = "prescript_access_token";
 const REFRESH_TOKEN_KEY = "prescript_refresh_token";
 const COUNTRY_KEY = "prescript_country_code";
+const sessionClearListeners = new Set();
+const memoryStorage = new Map();
+
+const readStorage = (key) => {
+  try {
+    return globalThis.localStorage?.getItem(key) || memoryStorage.get(key) || null;
+  } catch {
+    return memoryStorage.get(key) || null;
+  }
+};
+
+const writeStorage = (key, value) => {
+  memoryStorage.set(key, value);
+  try {
+    globalThis.localStorage?.setItem(key, value);
+  } catch {
+    // El almacenamiento puede estar bloqueado o sin cuota; la sesion no debe romper la aplicacion.
+  }
+};
+
+const removeStorage = (key) => {
+  memoryStorage.delete(key);
+  try {
+    globalThis.localStorage?.removeItem(key);
+  } catch {
+    // La limpieza es de mejor esfuerzo cuando el navegador bloquea el almacenamiento.
+  }
+};
 
 export function getToken() {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return readStorage(ACCESS_TOKEN_KEY);
 }
 
 export function setToken(token) {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  writeStorage(ACCESS_TOKEN_KEY, token);
 }
 
 export function getRefreshToken() {
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
+  return readStorage(REFRESH_TOKEN_KEY);
 }
 
 export function setRefreshToken(token) {
-  localStorage.setItem(REFRESH_TOKEN_KEY, token);
+  writeStorage(REFRESH_TOKEN_KEY, token);
 }
 
 export function getCountryCode() {
-  return localStorage.getItem(COUNTRY_KEY) || "";
+  return readStorage(COUNTRY_KEY) || "";
 }
 
 export function setCountryCode(countryCode) {
   const normalizedCode = String(countryCode || "").trim().toUpperCase();
   if (normalizedCode) {
-    localStorage.setItem(COUNTRY_KEY, normalizedCode);
+    writeStorage(COUNTRY_KEY, normalizedCode);
   } else {
-    localStorage.removeItem(COUNTRY_KEY);
+    removeStorage(COUNTRY_KEY);
   }
 }
 
 export function clearToken() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-  localStorage.removeItem(COUNTRY_KEY);
+  removeStorage(ACCESS_TOKEN_KEY);
+  removeStorage(REFRESH_TOKEN_KEY);
+  removeStorage(COUNTRY_KEY);
+  sessionClearListeners.forEach((listener) => listener());
+}
+
+export function subscribeToSessionClear(listener) {
+  sessionClearListeners.add(listener);
+  return () => sessionClearListeners.delete(listener);
 }

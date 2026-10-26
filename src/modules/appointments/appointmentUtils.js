@@ -1,6 +1,13 @@
 import { toDateKey, today } from "../../shared/utils/calendarUtils";
 import { getCountryLocale } from "../../shared/utils/countryUtils";
 import { getCountryFieldFormat } from "../../shared/utils/fieldMasks";
+import {
+  ACTIVE_APPOINTMENT_STATUSES,
+  addMinutes,
+  hasAppointmentTimeConflict,
+} from "./appointmentConflict.js";
+
+export { ACTIVE_APPOINTMENT_STATUSES, addMinutes, hasAppointmentTimeConflict };
 
 export const emptyAppointmentForm = {
   doctor: "",
@@ -32,8 +39,6 @@ export const statusTone = {
 export const APPOINTMENT_TIME_CONFLICT_MESSAGE =
   "Ese horario ya esta ocupado para este doctor. Elige otra hora disponible para continuar.";
 
-export const ACTIVE_APPOINTMENT_STATUSES = new Set(["scheduled", "rescheduled"]);
-
 export const currentTime = () => {
   const now = new Date();
   return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -58,30 +63,10 @@ export const isPastDateTime = (dateKey, time) => {
   return new Date(toDateTimeLocal(dateKey, time)).getTime() < Date.now();
 };
 
-export const addMinutes = (date, minutes) => new Date(date.getTime() + Number(minutes || 30) * 60000);
-
 export const isAppointmentPastDue = (appointment) => {
   if (!appointment || !ACTIVE_APPOINTMENT_STATUSES.has(appointment.status)) return false;
   const appointmentEnd = addMinutes(new Date(appointment.scheduled_at), appointment.duration_minutes);
   return appointmentEnd.getTime() <= Date.now();
-};
-
-export const hasAppointmentTimeConflict = ({ appointments, appointmentId, date, doctor, durationMinutes, time }) => {
-  if (!date || !doctor || !time) return false;
-  const nextStart = new Date(toDateTimeLocal(date, time));
-  const nextEnd = addMinutes(nextStart, durationMinutes);
-
-  return appointments.some((appointment) => {
-    if (appointment.id === appointmentId) return false;
-    if (String(appointment.doctor) !== String(doctor)) return false;
-    if (!ACTIVE_APPOINTMENT_STATUSES.has(appointment.status)) return false;
-
-    const existingStart = new Date(appointment.scheduled_at);
-    if (toDateKey(existingStart) !== date) return false;
-
-    const existingEnd = addMinutes(existingStart, appointment.duration_minutes);
-    return existingStart < nextEnd && existingEnd > nextStart;
-  });
 };
 
 export const getAppointmentDateKey = (appointment) => toDateKey(new Date(appointment.scheduled_at));

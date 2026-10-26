@@ -14,6 +14,10 @@ export function DashboardLayout() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Saltar al contenido principal
+      </a>
+
       <div className={isSidebarOpen ? "sidebar-layer open" : "sidebar-layer"}>
         <Sidebar isGlobalAdmin={Boolean(user?.isGlobalAdmin)} onNavigate={() => setIsSidebarOpen(false)} role={user?.role || "doctor"} />
       </div>
@@ -25,14 +29,14 @@ export function DashboardLayout() {
         type="button"
       />
 
-      <main className="workspace">
+      <div className="workspace">
         <Topbar onOpenProfile={() => setIsProfileOpen(true)} onToggleSidebar={() => setIsSidebarOpen(true)} />
-        <section className="content-area">
+        <main className="content-area" id="main-content" tabIndex={-1}>
           <div className="route-transition" key={`${location.pathname}-${location.search}-${user?.countryCode || "all"}`}>
             <Outlet />
           </div>
-        </section>
-      </main>
+        </main>
+      </div>
 
       <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} user={user} />
     </div>

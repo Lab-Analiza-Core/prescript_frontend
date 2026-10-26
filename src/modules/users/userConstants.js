@@ -6,4 +6,8 @@ export const ROLE_OPTIONS = [
   { label: "Secretaria", value: "SECRETARY" },
 ];
 
-export const roleLabel = (role) => ROLE_OPTIONS.find((option) => option.value === role)?.label || role || "Sin rol";
+// Roles que existen en la tabla pero no se asignan desde el formulario de usuarios.
+const EXTRA_ROLE_LABELS = { ORG_ADMIN: "Admin. de organizacion", PATIENT: "Paciente" };
+
+export const roleLabel = (role) =>
+  ROLE_OPTIONS.find((option) => option.value === role)?.label || EXTRA_ROLE_LABELS[role] || role || "Sin rol";

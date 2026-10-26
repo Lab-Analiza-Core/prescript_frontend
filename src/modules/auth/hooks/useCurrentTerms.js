@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { getCurrentTerms } from "../../../api/endpoints/onboarding";
+import { getCurrentTerms } from "../../../shared/services/catalogService";
 
 // Carga los terminos vigentes y expone su estado al formulario padre.
 export function useCurrentTerms() {

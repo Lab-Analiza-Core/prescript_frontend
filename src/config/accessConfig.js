@@ -7,6 +7,7 @@ import {
   CalendarDays,
   ClipboardList,
   FilePenLine,
+  Palette,
   Pill,
   UserCog,
   UsersRound,
@@ -23,7 +24,8 @@ export const ROLE_ALIASES = {
 };
 
 export const normalizeRole = (role) => {
-  const value = String(role || "doctor").trim();
+  const value = String(role || "").trim();
+  if (!value) return "";
   if (value.toUpperCase().startsWith("ADMIN_")) return "admin";
   return ROLE_ALIASES[value.toUpperCase()] || value.toLowerCase();
 };
@@ -39,6 +41,7 @@ export const navigationItems = [
   { label: "Usuarios", path: "/app/usuarios", icon: UserCog, roles: ["admin"] },
   { label: "Afiliaciones", path: "/app/afiliaciones", icon: BadgeCheck, roles: ["admin"] },
   { label: "Organizaciones", path: "/app/organizaciones", icon: Building2, roles: ["admin"], globalOnly: true },
+  { label: "Apariencia", path: "/app/apariencia", icon: Palette, roles: ["admin"] },
   { label: "Mi organizacion", path: "/app/mi-organizacion", icon: Building, roles: ["org_admin"] },
   { label: "Mi historial", path: "/app/mi-historial", icon: ClipboardList, roles: ["patient"] },
 ];
@@ -54,6 +57,7 @@ export const routeAccess = {
   usuarios: ["admin"],
   afiliaciones: ["admin"],
   organizaciones: ["admin"],
+  apariencia: ["admin"],
   "mi-organizacion": ["org_admin"],
   "mi-historial": ["patient"],
 };
@@ -68,9 +72,12 @@ export const firstRouteByRole = {
   secretary: "/app/agenda",
 };
 
-export const canAccessRoute = (role, routeKey) => {
+const GLOBAL_ONLY_ROUTES = new Set(["organizaciones"]);
+
+export const canAccessRoute = (role, routeKey, { isGlobalAdmin = false } = {}) => {
   const allowedRoles = routeAccess[routeKey] || [];
-  return allowedRoles.includes(normalizeRole(role));
+  if (!allowedRoles.includes(normalizeRole(role))) return false;
+  return !GLOBAL_ONLY_ROUTES.has(routeKey) || isGlobalAdmin;
 };
 
 export const getVisibleNavigation = (role, { isGlobalAdmin = false } = {}) => {

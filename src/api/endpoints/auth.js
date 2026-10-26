@@ -1,19 +1,2 @@
-import api from "../axios";
-
-export async function loginRequest({ email, password, username }) {
-  const response = await api.post("/auth/login", {
-    username: username || email,
-    password,
-  });
-  return response.data;
-}
-
-export async function meRequest() {
-  const response = await api.get("/auth/me");
-  return response.data;
-}
-
-export async function updateMeRequest(payload) {
-  const response = await api.patch("/auth/me", payload);
-  return response.data;
-}
+// Fachada temporal: el servicio vive junto a su dominio.
+export * from "../../modules/auth/services/authService";

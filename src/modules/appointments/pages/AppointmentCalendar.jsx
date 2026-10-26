@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
+import { PagedList } from "../../../shared/components/PagedList";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useAuth } from "../../../shared/context/useAuth";
 import {
@@ -121,22 +122,25 @@ export function AppointmentCalendar() {
             <strong>{pendingClosureAppointments.length}</strong>
           </header>
           <div className="pending-closure-list">
-            {pendingClosureAppointments.map((appointment) => (
-              <AppointmentRow
-                appointment={appointment}
-                key={appointment.id}
-                locale={locale}
-                onConfirm={confirmAppointment}
-                onMarkAttended={(selected) => requestAppointmentStatus(selected, "attended")}
-                onMarkNoShow={(selected) => requestAppointmentStatus(selected, "no_show")}
-                onRemind={sendReminder}
-                onRequestCancellation={(selected) => requestAppointmentStatus(selected, "cancelled")}
-                onReschedule={selectAppointment}
-                showDate
-                statusLabels={appointmentStatusLabels}
-                statusTone={appointmentStatusTone}
-              />
-            ))}
+            <PagedList
+              items={pendingClosureAppointments}
+              renderItem={(appointment) => (
+                <AppointmentRow
+                  appointment={appointment}
+                  key={appointment.id}
+                  locale={locale}
+                  onConfirm={confirmAppointment}
+                  onMarkAttended={(selected) => requestAppointmentStatus(selected, "attended")}
+                  onMarkNoShow={(selected) => requestAppointmentStatus(selected, "no_show")}
+                  onRemind={sendReminder}
+                  onRequestCancellation={(selected) => requestAppointmentStatus(selected, "cancelled")}
+                  onReschedule={selectAppointment}
+                  showDate
+                  statusLabels={appointmentStatusLabels}
+                  statusTone={appointmentStatusTone}
+                />
+              )}
+            />
           </div>
         </section>
       ) : null}
@@ -204,22 +208,27 @@ export function AppointmentCalendar() {
 
           {isLoading ? <div className="empty-state">Cargando agenda</div> : null}
           {!isLoading && selectedAppointments.length === 0 ? <div className="empty-state">Sin citas para esta fecha</div> : null}
-          {!isLoading &&
-            selectedAppointments.map((appointment) => (
-              <AppointmentRow
-                appointment={appointment}
-                key={appointment.id}
-                locale={locale}
-                onConfirm={confirmAppointment}
-                onMarkAttended={(selected) => requestAppointmentStatus(selected, "attended")}
-                onMarkNoShow={(selected) => requestAppointmentStatus(selected, "no_show")}
-                onRemind={sendReminder}
-                onRequestCancellation={(selected) => requestAppointmentStatus(selected, "cancelled")}
-                onReschedule={selectAppointment}
-                statusLabels={appointmentStatusLabels}
-                statusTone={appointmentStatusTone}
-              />
-            ))}
+          {!isLoading ? (
+            <PagedList
+              items={selectedAppointments}
+              renderItem={(appointment) => (
+                <AppointmentRow
+                  appointment={appointment}
+                  key={appointment.id}
+                  locale={locale}
+                  onConfirm={confirmAppointment}
+                  onMarkAttended={(selected) => requestAppointmentStatus(selected, "attended")}
+                  onMarkNoShow={(selected) => requestAppointmentStatus(selected, "no_show")}
+                  onRemind={sendReminder}
+                  onRequestCancellation={(selected) => requestAppointmentStatus(selected, "cancelled")}
+                  onReschedule={selectAppointment}
+                  statusLabels={appointmentStatusLabels}
+                  statusTone={appointmentStatusTone}
+                />
+              )}
+              resetKey={selectedDate}
+            />
+          ) : null}
         </section>
       </div>
 

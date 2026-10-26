@@ -6,11 +6,14 @@ import {
   deleteSecretaryAssignment,
   listMembers,
   listSecretaryAssignments,
-} from "../../../api/endpoints/organizations";
+} from "../services/organizationService";
+import { Pagination } from "../../../shared/components/Pagination";
 import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { usePagedRows } from "../../../shared/hooks/usePagedResource";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { ConfirmDialog } from "../../users/components/ConfirmDialog";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const COLUMNS = "1fr 1fr 70px";
 
@@ -36,7 +39,9 @@ export function AssignmentsPanel({ organizationId }) {
   const doctors = people.data?.doctors || [];
   // El listado de vinculos trae todos los permitidos; se acota a esta organizacion.
   const secretaryProfileIds = new Set(secretaries.map((member) => member.profile_id));
-  const rows = (assignments.data || []).filter((row) => secretaryProfileIds.has(row.secretary));
+  const allRows = (assignments.data || []).filter((row) => secretaryProfileIds.has(row.secretary));
+  const paged = usePagedRows(allRows);
+  const rows = paged.rows;
 
   const handleCreate = async (event) => {
     event.preventDefault();
@@ -76,25 +81,25 @@ export function AssignmentsPanel({ organizationId }) {
       <form className="inline-form" onSubmit={handleCreate}>
         <label>
           <span>Secretaria</span>
-          <select onChange={(event) => setForm({ ...form, secretary: event.target.value })} value={form.secretary}>
+          <SearchSelect onChange={(event) => setForm({ ...form, secretary: event.target.value })} value={form.secretary}>
             <option value="">Seleccione</option>
             {secretaries.map((member) => (
               <option key={member.profile_id} value={member.profile_id}>
                 {member.full_name}
               </option>
             ))}
-          </select>
+          </SearchSelect>
         </label>
         <label>
           <span>Doctor</span>
-          <select onChange={(event) => setForm({ ...form, doctor: event.target.value })} value={form.doctor}>
+          <SearchSelect onChange={(event) => setForm({ ...form, doctor: event.target.value })} value={form.doctor}>
             <option value="">Seleccione</option>
             {doctors.map((member) => (
               <option key={member.profile_id} value={member.profile_id}>
                 {member.full_name}
               </option>
             ))}
-          </select>
+          </SearchSelect>
         </label>
         <button className="primary-action compact" disabled={isSaving} type="submit">
           <Link2 size={17} aria-hidden="true" />
@@ -110,7 +115,7 @@ export function AssignmentsPanel({ organizationId }) {
         </div>
 
         {assignments.isLoading && !assignments.data ? <div className="empty-state">Cargando vinculos</div> : null}
-        {assignments.data && rows.length === 0 ? <div className="empty-state">Sin vinculos registrados</div> : null}
+        {assignments.data && allRows.length === 0 ? <div className="empty-state">Sin vinculos registrados</div> : null}
 
         {rows.map((row) => (
           <article className="table-row admin-row" key={row.id} style={{ "--cols": COLUMNS }}>
@@ -123,6 +128,7 @@ export function AssignmentsPanel({ organizationId }) {
             </div>
           </article>
         ))}
+        <Pagination onPageChange={paged.setPage} page={paged.page} total={paged.total} />
       </div>
 
       {toDelete ? (

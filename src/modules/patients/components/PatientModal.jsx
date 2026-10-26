@@ -2,6 +2,7 @@ import { Save, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { getCountryCode } from "../../../shared/utils/countryUtils";
 import {
   applyNumericMask,
   getCountryFieldFormat,
@@ -9,6 +10,7 @@ import {
   maskPlaceholder,
   stripPhoneCountryCode,
 } from "../../../shared/utils/fieldMasks";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const emptyForm = {
   doctor: "",
@@ -47,10 +49,17 @@ const getErrorMessage = (error) => {
   return "No se pudo guardar el paciente. Revise los datos.";
 };
 
+const getDuplicateConfirmationMessage = (error) => {
+  const detail = error.response?.data?.confirm_duplicate;
+  if (Array.isArray(detail)) return detail[0] || "";
+  return typeof detail === "string" ? detail : "";
+};
+
 export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode, onClose, onSubmit, patient, requiresDoctor = false }) {
   const [form, setForm] = useState(() => (isOpen ? getInitialForm(patient) : emptyForm));
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [requiresDuplicateConfirmation, setRequiresDuplicateConfirmation] = useState(false);
 
   const title = useMemo(() => (mode === "edit" ? "Modificar paciente" : "Nuevo paciente"), [mode]);
   const selectedDoctor = doctorOptions.find((doctor) => String(doctor.id) === String(form.doctor));
@@ -58,6 +67,9 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
     () => getCountryFieldFormat(selectedDoctor?.country || country),
     [country, selectedDoctor?.country],
   );
+  // Guatemala: basta con DNI o telefono. Resto de paises: ambos obligatorios.
+  const contactEither = (getCountryCode(selectedDoctor?.country || country) || "HN") === "GT";
+  const contactLabel = contactEither ? " (DNI o telefono *)" : " *";
   const dniPlaceholder = useMemo(() => maskPlaceholder(fieldFormat.dniMask), [fieldFormat.dniMask]);
 
   if (!isOpen) return null;
@@ -65,6 +77,7 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+    setRequiresDuplicateConfirmation(false);
   };
 
   const handleDniChange = (event) => {
@@ -72,6 +85,7 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
       ...current,
       dni: applyNumericMask(event.target.value, fieldFormat.dniMask),
     }));
+    setRequiresDuplicateConfirmation(false);
   };
 
   const handlePhoneChange = (event) => {
@@ -82,9 +96,16 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
         fieldFormat.phoneMask,
       ),
     }));
+    setRequiresDuplicateConfirmation(false);
   };
 
   const buildPayload = () => {
+    if (contactEither) {
+      if (!form.dni.trim() && !form.phone.trim()) throw new Error("Ingrese el DNI o el telefono del paciente.");
+    } else {
+      if (!form.dni.trim()) throw new Error("El DNI es obligatorio.");
+      if (!form.phone.trim()) throw new Error("El telefono es obligatorio.");
+    }
     if (form.dni && !isMaskComplete(form.dni, fieldFormat.dniMask)) {
       throw new Error(`El DNI debe seguir el formato ${fieldFormat.dniMask}.`);
     }
@@ -112,9 +133,13 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
     setErrorMessage("");
     setIsSaving(true);
     try {
-      await onSubmit(buildPayload());
+      const payload = buildPayload();
+      if (requiresDuplicateConfirmation) payload.confirm_duplicate = true;
+      await onSubmit(payload);
     } catch (error) {
-      setErrorMessage(error.response ? getErrorMessage(error) : error.message);
+      const duplicateMessage = getDuplicateConfirmationMessage(error);
+      setRequiresDuplicateConfirmation(Boolean(duplicateMessage));
+      setErrorMessage(duplicateMessage || (error.response ? getErrorMessage(error) : error.message));
     } finally {
       setIsSaving(false);
     }
@@ -144,14 +169,14 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
             {requiresDoctor ? (
               <label>
                 <span>Doctor responsable</span>
-                <select name="doctor" onChange={handleChange} required value={form.doctor}>
+                <SearchSelect name="doctor" onChange={handleChange} required value={form.doctor}>
                   <option value="">Seleccione doctor</option>
                   {doctorOptions.map((doctor) => (
                     <option key={doctor.id} value={doctor.id}>
                       {doctor.full_name}
                     </option>
                   ))}
-                </select>
+                </SearchSelect>
               </label>
             ) : null}
             <label>
@@ -159,19 +184,20 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
               <input name="last_name" onChange={handleChange} required value={form.last_name} />
             </label>
             <label>
-              <span>DNI</span>
+              <span>DNI{contactLabel}</span>
               <input
                 inputMode="numeric"
                 maxLength={fieldFormat.dniMask?.length || 25}
                 name="dni"
                 onChange={handleDniChange}
+                required={!contactEither}
                 placeholder={dniPlaceholder || "DNI"}
                 value={form.dni}
               />
               {fieldFormat.dniMask ? <small>Formato: {fieldFormat.dniMask}</small> : null}
             </label>
             <label>
-              <span>Telefono</span>
+              <span>Telefono{contactLabel}</span>
               <div className="phone-input-group">
                 <input aria-label="Codigo de pais" disabled value={fieldFormat.phoneCode} />
                 <input
@@ -179,6 +205,7 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
                   maxLength={fieldFormat.phoneMask.length}
                   name="phone"
                   onChange={handlePhoneChange}
+                  required={!contactEither}
                   placeholder={fieldFormat.phoneMask}
                   value={form.phone}
                 />
@@ -195,12 +222,12 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
             </label>
             <label>
               <span>Sexo</span>
-              <select name="sex" onChange={handleChange} value={form.sex}>
+              <SearchSelect name="sex" onChange={handleChange} value={form.sex}>
                 <option value="">Sin especificar</option>
                 <option value="F">Femenino</option>
                 <option value="M">Masculino</option>
                 <option value="O">Otro</option>
-              </select>
+              </SearchSelect>
             </label>
             <label className="field-wide">
               <span>Notas comerciales</span>
@@ -216,7 +243,7 @@ export function PatientModal({ country = "HN", doctorOptions = [], isOpen, mode,
             </button>
             <button className="primary-action compact" disabled={isSaving} type="submit">
               <Save size={18} aria-hidden="true" />
-              {isSaving ? "Guardando" : "Guardar"}
+              {isSaving ? "Guardando" : requiresDuplicateConfirmation ? "Confirmar registro" : "Guardar"}
             </button>
           </div>
         </form>

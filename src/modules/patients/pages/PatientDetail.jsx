@@ -2,7 +2,7 @@ import { FileText, HeartPulse, MessageCircle, UserRound, WalletCards } from "luc
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { getPatient } from "../../../api/endpoints/patients";
+import { getPatient } from "../services/patientService";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useAuth } from "../../../shared/context/useAuth";
 import { getCountryLocale } from "../../../shared/utils/countryUtils";

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { isAppointmentPastDue } from "../appointmentUtils";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 export function AppointmentModal({
   eligiblePatients,
@@ -86,26 +87,26 @@ export function AppointmentModal({
             <div className="appointment-section-grid">
               <label>
                 <span>Doctor</span>
-                <select disabled={!isSecretary || isRescheduling} name="doctor" onChange={onChange} required value={form.doctor}>
+                <SearchSelect disabled={!isSecretary || isRescheduling} name="doctor" onChange={onChange} required value={form.doctor}>
                   {doctors.map((doctor) => (
                     <option key={doctor.id} value={doctor.id}>
                       {doctor.full_name}
                     </option>
                   ))}
-                </select>
+                </SearchSelect>
                 <small>{isRescheduling ? "Se conserva el profesional de la cita." : "Profesional que atenderá al paciente."}</small>
               </label>
 
               <label>
                 <span>Paciente con preclínica</span>
-                <select disabled={isRescheduling} name="patient" onChange={onChange} required value={form.patient}>
+                <SearchSelect disabled={isRescheduling} name="patient" onChange={onChange} required value={form.patient}>
                   <option value="">Seleccione paciente</option>
                   {eligiblePatients.map((patient) => (
                     <option key={patient.id} value={patient.id}>
                       {patient.full_name}
                     </option>
                   ))}
-                </select>
+                </SearchSelect>
                 <small>{selectedPatient ? `DNI ${selectedPatient.dni || "sin registrar"}` : "Solo se muestran pacientes con preclínica."}</small>
               </label>
             </div>

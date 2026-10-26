@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 
-import { decideOrgAdmin, listOrgAdminRequests } from "../../../api/endpoints/organizations";
-import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { decideOrgAdmin, listOrgAdminRequests } from "../services/organizationService";
+import { Pagination } from "../../../shared/components/Pagination";
+import { usePagedResource } from "../../../shared/hooks/usePagedResource";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { ConfirmDialog } from "../../users/components/ConfirmDialog";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const COLUMNS = "minmax(200px,1.4fr) 1.2fr 0.7fr 0.7fr 90px";
 const STATUS_LABELS = { pending: "Pendiente", active: "Aprobado", inactive: "Rechazado" };
@@ -13,8 +15,8 @@ const STATUS_LABELS = { pending: "Pendiente", active: "Aprobado", inactive: "Rec
 export function OrgAdminRequestsPanel() {
   const { showToast } = useToast();
   const [statusFilter, setStatusFilter] = useState("pending");
-  const { data, error, isLoading, reload } = useApiResource(
-    () => listOrgAdminRequests(statusFilter),
+  const { data, error, isLoading, page, reload, setPage, total } = usePagedResource(
+    (pageNumber) => listOrgAdminRequests(statusFilter, pageNumber),
     `org-admins-${statusFilter}`,
   );
   const [decision, setDecision] = useState(null);
@@ -40,12 +42,12 @@ export function OrgAdminRequestsPanel() {
       <div className="inline-form">
         <label>
           <span>Estado</span>
-          <select onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
+          <SearchSelect onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
             <option value="pending">Pendientes</option>
             <option value="active">Aprobados</option>
             <option value="inactive">Rechazados</option>
             <option value="">Todos</option>
-          </select>
+          </SearchSelect>
         </label>
       </div>
 
@@ -89,6 +91,7 @@ export function OrgAdminRequestsPanel() {
             </div>
           </article>
         ))}
+        <Pagination isLoading={isLoading} onPageChange={setPage} page={page} total={total} />
       </div>
 
       {decision ? (

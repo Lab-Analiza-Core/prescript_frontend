@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Building2, Edit3, FileText, Plus, Settings2, UserCheck } from "lucide-react";
 
-import { createOrganization, listOrganizations, updateOrganization } from "../../../api/endpoints/organizations";
+import { createOrganization, listOrganizations, updateOrganization } from "../services/organizationService";
 import { PageHeader } from "../../../shared/components/PageHeader";
-import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { Pagination } from "../../../shared/components/Pagination";
+import { usePagedResource } from "../../../shared/hooks/usePagedResource";
 import { useAuth } from "../../../shared/context/useAuth";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
@@ -48,8 +49,8 @@ function OrganizationsAdminContent({ countries }) {
   const [selected, setSelected] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data, error, isLoading, reload } = useApiResource(
-    () => listOrganizations({ search: appliedSearch }),
+  const { data, error, isLoading, page, reload, setPage, total } = usePagedResource(
+    (pageNumber) => listOrganizations({ search: appliedSearch, page: pageNumber }),
     `organizations-${appliedSearch}`,
   );
   const organizations = data || [];
@@ -114,7 +115,7 @@ function OrganizationsAdminContent({ countries }) {
             <div className="user-control-header">
               <div>
                 <h2>Todas las organizaciones</h2>
-                <span>{organizations.length} registros</span>
+                <span>{total} registros</span>
               </div>
               <div className="user-control-actions">
                 <div className="toolbar user-search">
@@ -173,6 +174,7 @@ function OrganizationsAdminContent({ countries }) {
                 </article>
               ))}
             </div>
+            <Pagination isLoading={isLoading} onPageChange={setPage} page={page} total={total} />
           </div>
 
           {selectedOrganization ? (

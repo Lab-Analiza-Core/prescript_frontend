@@ -2,7 +2,7 @@ import { CalendarDays, FileText, LoaderCircle, Search, UserRound } from "lucide-
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { searchClinicalRecords } from "../../api/endpoints/search";
+import { searchClinicalRecords } from "../services/searchService";
 import { getCountryLocale } from "../utils/countryUtils";
 import { toDateKey } from "../utils/calendarUtils";
 

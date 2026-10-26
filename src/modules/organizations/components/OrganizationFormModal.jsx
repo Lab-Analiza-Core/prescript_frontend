@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Building2, X } from "lucide-react";
 
-import { listPublicDivisions, listPublicSpecialties } from "../../../api/endpoints/onboarding";
+import { listPublicDivisions, listPublicSpecialties } from "../../../shared/services/catalogService";
 import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const emptyForm = { name: "", country: "", division: "", medicalArea: "", status: "active" };
 
@@ -80,49 +81,49 @@ export function OrganizationFormModal({ countries, isSaving, onClose, onSubmit, 
 
           <label>
             <span>Pais</span>
-            <select disabled={isEditing} name="country" onChange={changeCountry} required value={form.country}>
+            <SearchSelect disabled={isEditing} name="country" onChange={changeCountry} required value={form.country}>
               <option value="">Seleccione</option>
               {countries.map((country) => (
                 <option key={country.id} value={country.id}>
                   {country.name}
                 </option>
               ))}
-            </select>
+            </SearchSelect>
           </label>
 
           <label>
             <span>{divisionLabel}</span>
-            <select disabled={!countryCode} name="division" onChange={updateField} value={form.division}>
+            <SearchSelect disabled={!countryCode} name="division" onChange={updateField} value={form.division}>
               <option value="">Sin {divisionLabel.toLowerCase()}</option>
               {divisionOptions.map((division) => (
                 <option key={division.id} value={division.id}>
                   {division.name}
                 </option>
               ))}
-            </select>
+            </SearchSelect>
           </label>
 
           <label className="field-wide">
             <span>Area medica</span>
-            <select disabled={!countryCode} name="medicalArea" onChange={updateField} value={form.medicalArea}>
+            <SearchSelect disabled={!countryCode} name="medicalArea" onChange={updateField} value={form.medicalArea}>
               <option value="">Sin area medica</option>
               {(specialties.data || []).map((specialty) => (
                 <option key={specialty.id} value={specialty.id}>
                   {specialty.name}
                 </option>
               ))}
-            </select>
+            </SearchSelect>
           </label>
 
           {isEditing ? (
             <label className="field-wide">
               <span>Estado</span>
-              <select name="status" onChange={updateField} value={form.status}>
+              <SearchSelect name="status" onChange={updateField} value={form.status}>
                 <option value="active">Activa</option>
                 <option disabled={organization.is_interactive_core} value="suspended">
                   Suspendida (bloquea el ingreso de sus miembros)
                 </option>
-              </select>
+              </SearchSelect>
             </label>
           ) : null}
         </form>

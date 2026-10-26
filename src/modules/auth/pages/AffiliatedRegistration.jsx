@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
-import { requestAffiliationCode } from "../../../api/endpoints/onboarding";
+import { requestAffiliationCode } from "../services/registrationService";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { applyNumericMask, getCountryFieldFormat, maskPlaceholder } from "../../../shared/utils/fieldMasks";
 import { useAuth } from "../../../shared/context/useAuth";

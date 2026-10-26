@@ -1,6 +1,6 @@
 import { Building2 } from "lucide-react";
 
-import { listOrganizations } from "../../../api/endpoints/organizations";
+import { listOrganizations } from "../services/organizationService";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useApiResource } from "../../../shared/hooks/useApiResource";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { KeyRound, Link2, UsersRound } from "lucide-react";
+import { KeyRound, Link2, Palette, UsersRound } from "lucide-react";
 
+import { ThemeEditor } from "../../appearance/components/ThemeEditor";
 import { AssignmentsPanel } from "./AssignmentsPanel";
 import { InvitationsPanel } from "./InvitationsPanel";
 import { MembersPanel } from "./MembersPanel";
@@ -10,6 +11,7 @@ const TABS = [
   { key: "members", label: "Miembros", icon: UsersRound },
   { key: "invitations", label: "Invitaciones", icon: KeyRound },
   { key: "assignments", label: "Secretarias", icon: Link2 },
+  { key: "appearance", label: "Apariencia", icon: Palette },
 ];
 
 // Gestion de una organizacion: la usan el administrador de organizacion (la suya) y el global (cualquiera).
@@ -42,6 +44,7 @@ export function OrganizationWorkspace({ isGlobal = false, organization }) {
         />
       ) : null}
       {tab === "assignments" ? <AssignmentsPanel organizationId={organization.id} /> : null}
+      {tab === "appearance" ? <ThemeEditor organization={organization} /> : null}
     </div>
   );
 }

@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { Copy, Plus, Ban } from "lucide-react";
 
-import { createInvitation, listInvitations, revokeInvitation } from "../../../api/endpoints/organizations";
-import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { createInvitation, listInvitations, revokeInvitation } from "../services/organizationService";
+import { Pagination } from "../../../shared/components/Pagination";
+import { usePagedResource } from "../../../shared/hooks/usePagedResource";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { ConfirmDialog } from "../../users/components/ConfirmDialog";
 import { getInvitationState, ROLE_LABELS } from "../organizationConstants";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const emptyForm = { role: "", maxUses: "", expiresAt: "" };
 
 export function InvitationsPanel({ allowedRoles, organization }) {
   const { showToast } = useToast();
-  const { data, error, isLoading, reload } = useApiResource(
-    () => listInvitations(organization.id),
+  const { data, error, isLoading, page, reload, setPage, total } = usePagedResource(
+    (pageNumber) => listInvitations(organization.id, pageNumber),
     `invitations-${organization.id}`,
   );
   const [form, setForm] = useState({ ...emptyForm, role: allowedRoles[0].value });
@@ -76,13 +78,13 @@ export function InvitationsPanel({ allowedRoles, organization }) {
       <form className="inline-form invitation-form" onSubmit={handleCreate}>
         <label>
           <span>Rol</span>
-          <select name="role" onChange={updateField} value={form.role}>
+          <SearchSelect name="role" onChange={updateField} value={form.role}>
             {allowedRoles.map((role) => (
               <option key={role.value} value={role.value}>
                 {role.label}
               </option>
             ))}
-          </select>
+          </SearchSelect>
         </label>
         <label>
           <span>Usos maximos</span>
@@ -137,6 +139,7 @@ export function InvitationsPanel({ allowedRoles, organization }) {
             </article>
           );
         })}
+        <Pagination isLoading={isLoading} onPageChange={setPage} page={page} total={total} />
       </div>
 
       {toRevoke ? (

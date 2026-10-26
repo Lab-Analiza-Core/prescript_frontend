@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import { createSingleFlight } from "./singleFlight";
 import { clearToken, getCountryCode, getRefreshToken, getToken, setRefreshToken, setToken } from "./tokenStore";
 
 const normalizeApiBaseUrl = (value) => {
@@ -36,30 +37,45 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+const refreshAccessToken = createSingleFlight(async () => {
+  const refresh = getRefreshToken();
+  if (!refresh) {
+    clearToken();
+    throw new Error("No hay una sesion disponible para renovar.");
+  }
+
+  try {
+    const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refresh });
+    setToken(response.data.access);
+    if (response.data.refresh) {
+      setRefreshToken(response.data.refresh);
+    }
+    return response.data.access;
+  } catch (error) {
+    clearToken();
+    throw error;
+  }
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     const isRefreshRoute = originalRequest?.url?.includes("/auth/refresh");
 
-    if (error.response?.status === 401 && !originalRequest?._retry && !isRefreshRoute) {
-      const refresh = getRefreshToken();
-      if (!refresh) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isRefreshRoute) {
+      if (!getRefreshToken()) {
         clearToken();
         return Promise.reject(error);
       }
 
       originalRequest._retry = true;
       try {
-        const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refresh });
-        setToken(response.data.access);
-        if (response.data.refresh) {
-          setRefreshToken(response.data.refresh);
-        }
-        originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+        const access = await refreshAccessToken();
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${access}`;
         return api(originalRequest);
       } catch (refreshError) {
-        clearToken();
         return Promise.reject(refreshError);
       }
     }

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 
-import { decideAffiliationRequest, listAffiliationRequests } from "../../../api/endpoints/onboarding";
+import { decideAffiliationRequest, listAffiliationRequests } from "../services/affiliationService";
 import { PageHeader } from "../../../shared/components/PageHeader";
-import { useApiResource } from "../../../shared/hooks/useApiResource";
+import { Pagination } from "../../../shared/components/Pagination";
+import { usePagedResource } from "../../../shared/hooks/usePagedResource";
 import { useToast } from "../../../shared/context/useToast";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { ConfirmDialog } from "../../users/components/ConfirmDialog";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const COLUMNS = "minmax(190px,1.3fr) 0.5fr minmax(230px,1.5fr) 0.8fr 0.7fr 90px";
 const ROLE_LABELS = { DOCTOR: "Doctor", SECRETARY: "Secretaria", NURSE: "Enfermera" };
@@ -21,8 +23,8 @@ const STATUS_CLASSES = {
 export function AffiliationRequests() {
   const { showToast } = useToast();
   const [statusFilter, setStatusFilter] = useState("pending");
-  const { data, error, isLoading, reload } = useApiResource(
-    () => listAffiliationRequests(statusFilter),
+  const { data, error, isLoading, page, reload, setPage, total } = usePagedResource(
+    (pageNumber) => listAffiliationRequests(statusFilter, pageNumber),
     `affiliation-requests-${statusFilter}`,
   );
   const [decision, setDecision] = useState(null);
@@ -56,15 +58,15 @@ export function AffiliationRequests() {
         <div className="user-control-header">
           <div>
             <h2>Solicitudes</h2>
-            <span>{requests.length} registros</span>
+            <span>{total} registros</span>
           </div>
           <div className="user-control-actions">
-            <select aria-label="Filtrar por estado" onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
+            <SearchSelect aria-label="Filtrar por estado" onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}>
               <option value="pending">Pendientes</option>
               <option value="approved">Aprobadas</option>
               <option value="rejected">Rechazadas</option>
               <option value="">Todas</option>
-            </select>
+            </SearchSelect>
           </div>
         </div>
 
@@ -119,6 +121,7 @@ export function AffiliationRequests() {
             </article>
           ))}
         </div>
+        <Pagination isLoading={isLoading} onPageChange={setPage} page={page} total={total} />
       </div>
 
       {decision ? (

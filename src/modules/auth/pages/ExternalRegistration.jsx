@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { BadgeCheck, Building2, CheckCircle2, ChevronLeft, ChevronRight, KeyRound, LoaderCircle, Mail, Search } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
-import { getInvitationInfo, listPublicSpecialties } from "../../../api/endpoints/onboarding";
+import { getInvitationInfo } from "../services/registrationService";
+import { listPublicSpecialties } from "../../../shared/services/catalogService";
 import { getApiErrorMessage } from "../../../shared/utils/apiErrors";
 import { applyNumericMask, getCountryFieldFormat, isMaskComplete, maskPlaceholder } from "../../../shared/utils/fieldMasks";
 import { useAuth } from "../../../shared/context/useAuth";

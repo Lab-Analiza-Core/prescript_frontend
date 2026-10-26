@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   createAppointment,
   listAppointments,
   reschedulePastAppointment,
   updateAppointment,
-} from "../../../api/endpoints/appointments";
-import { listDoctors } from "../../../api/endpoints/doctor";
-import { listPatients } from "../../../api/endpoints/patients";
+} from "../services/appointmentService";
+import { listDoctors } from "../../../shared/services/doctorService";
+import { listPatients } from "../../patients/services/patientService";
 import {
   getCalendarDays,
   getMonthRange,
@@ -43,6 +43,7 @@ export function useAgenda(user, focusedDate) {
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const doctorsRef = useRef([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [appointmentAction, setAppointmentAction] = useState(null);
   const [form, setForm] = useState({ ...emptyAppointmentForm, date: initialDate });
@@ -60,17 +61,12 @@ export function useAgenda(user, focusedDate) {
       setErrorMessage("");
       try {
         const { first, last } = getMonthRange(monthDate);
-        const [appointmentPayload, pendingPayload, patientPayload, doctorPayload] = await Promise.all([
+        const [appointmentPayload, pendingPayload] = await Promise.all([
           listAppointments({ dateFrom: first, dateTo: last }),
           listAppointments({ pendingClosure: true }),
-          listPatients(),
-          listDoctors(),
         ]);
-        const nextDoctors = Array.isArray(doctorPayload) ? doctorPayload : [];
         setAppointments(Array.isArray(appointmentPayload) ? appointmentPayload : []);
         setPendingAppointments(Array.isArray(pendingPayload) ? pendingPayload : []);
-        setPatients(Array.isArray(patientPayload) ? patientPayload : []);
-        setDoctors(nextDoctors);
         if (resetForm) {
           setSelectedAppointment(null);
         }
@@ -79,18 +75,16 @@ export function useAgenda(user, focusedDate) {
             ? {
                 ...emptyAppointmentForm,
                 date: monthDate,
-                doctor: user?.doctorProfile?.id || nextDoctors[0]?.id || "",
+              doctor: user?.doctorProfile?.id || doctorsRef.current[0]?.id || "",
               }
             : {
                 ...current,
-                doctor: current.doctor || user?.doctorProfile?.id || nextDoctors[0]?.id || "",
+                doctor: current.doctor || user?.doctorProfile?.id || doctorsRef.current[0]?.id || "",
               },
         );
       } catch {
         setAppointments([]);
         setPendingAppointments([]);
-        setPatients([]);
-        setDoctors([]);
         setErrorMessage("No se pudo cargar la agenda medica.");
       } finally {
         setIsLoading(false);
@@ -108,6 +102,33 @@ export function useAgenda(user, focusedDate) {
       window.clearTimeout(timer);
     };
   }, [loadAgenda, visibleMonth]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([listPatients(), listDoctors()])
+      .then(([patientPayload, doctorPayload]) => {
+        if (!isMounted) return;
+        const nextDoctors = Array.isArray(doctorPayload) ? doctorPayload : [];
+        doctorsRef.current = nextDoctors;
+        setPatients(Array.isArray(patientPayload) ? patientPayload : []);
+        setDoctors(nextDoctors);
+        setForm((current) => ({
+          ...current,
+          doctor: current.doctor || user?.doctorProfile?.id || nextDoctors[0]?.id || "",
+        }));
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        doctorsRef.current = [];
+        setPatients([]);
+        setDoctors([]);
+        setErrorMessage("No se pudieron cargar pacientes y doctores para la agenda.");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.doctorProfile?.id]);
 
   const appointmentsByDate = useMemo(() => {
     return appointments.reduce((grouped, appointment) => {

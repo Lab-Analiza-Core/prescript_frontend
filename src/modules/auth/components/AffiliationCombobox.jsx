@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { LoaderCircle, Search } from "lucide-react";
 
-import { searchAffiliation } from "../../../api/endpoints/onboarding";
+import { searchAffiliation } from "../services/registrationService";
 
 const MIN_QUERY_LENGTH = 3;
 const DEBOUNCE_MS = 300;

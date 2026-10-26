@@ -1,13 +1,15 @@
-import { Edit3, Filter, KeyRound, Plus, Search, ShieldCheck, Trash2 } from "lucide-react";
+import { Edit3, Filter, Globe2, KeyRound, MapPin, Plus, Search, ShieldCheck, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { createUser, deactivateUser, listUsers, resetUserPassword, updateUser } from "../../../api/endpoints/users";
+import { createUser, deactivateUser, listUsers, resetUserPassword, updateUser } from "../services/userService";
 import { PageHeader } from "../../../shared/components/PageHeader";
+import { Pagination } from "../../../shared/components/Pagination";
 import { useToast } from "../../../shared/context/useToast";
 import { useAuth } from "../../../shared/context/useAuth";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { UserModal } from "../components/UserModal";
 import { ROLE_OPTIONS, roleLabel } from "../userConstants";
+import { SearchSelect } from "../../../shared/components/SearchSelect";
 
 const getLoadErrorMessage = (error) => {
   if (error.response?.status === 403) {
@@ -18,6 +20,9 @@ const getLoadErrorMessage = (error) => {
   }
   return "No se pudo cargar el modulo de usuarios.";
 };
+
+const toRows = (payload) => (Array.isArray(payload) ? payload : payload.results || []);
+const toTotal = (payload) => (Array.isArray(payload) ? payload.length : payload.count ?? toRows(payload).length);
 
 const getInitials = (user) => {
   const source = user.full_name || user.email || user.username || "U";
@@ -34,6 +39,8 @@ export function UserManagement() {
   const { showToast } = useToast();
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState({ search: "", role: "", isActive: "" });
   const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,24 +53,36 @@ export function UserManagement() {
     [filters],
   );
 
-  const loadUsers = useCallback(async (nextFilters = filters) => {
+  const loadUsers = useCallback(async (nextFilters = filters, nextPage = page) => {
     setIsLoading(true);
     try {
-      const payload = await listUsers(nextFilters);
-      setUsers(Array.isArray(payload) ? payload : payload.results || []);
+      let payload;
+      let resolvedPage = nextPage;
+      try {
+        payload = await listUsers({ ...nextFilters, page: nextPage });
+      } catch (error) {
+        // Pagina fuera de rango (p. ej. se quedo sin filas): se retrocede una.
+        if (error.response?.status !== 404 || nextPage <= 1) throw error;
+        resolvedPage = nextPage - 1;
+        payload = await listUsers({ ...nextFilters, page: resolvedPage });
+      }
+      setPage(resolvedPage);
+      setUsers(toRows(payload));
+      setTotal(toTotal(payload));
     } catch (error) {
       showToast(getLoadErrorMessage(error), "error");
     } finally {
       setIsLoading(false);
     }
-  }, [filters, showToast]);
+  }, [filters, page, showToast]);
 
   useEffect(() => {
     let isMounted = true;
-    listUsers()
+    listUsers({ page: 1 })
       .then((payload) => {
         if (isMounted) {
-          setUsers(Array.isArray(payload) ? payload : payload.results || []);
+          setUsers(toRows(payload));
+      setTotal(toTotal(payload));
         }
       })
       .catch((error) => {
@@ -89,7 +108,7 @@ export function UserManagement() {
   const clearFilters = () => {
     const nextFilters = { search: "", role: "", isActive: "" };
     setFilters(nextFilters);
-    loadUsers(nextFilters);
+    loadUsers(nextFilters, 1);
   };
 
   const openCreate = () => setModalState({ isOpen: true, mode: "create", user: null });
@@ -164,7 +183,7 @@ export function UserManagement() {
         <div className="user-control-header">
           <div>
             <h2>Todos los usuarios</h2>
-            <span>{users.length} registros</span>
+            <span>{total} registros</span>
           </div>
           <div className="user-control-actions">
             <div className="toolbar user-search">
@@ -173,7 +192,7 @@ export function UserManagement() {
                 aria-label="Buscar usuario"
                 onChange={(event) => updateFilter("search", event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter") loadUsers();
+                  if (event.key === "Enter") loadUsers(filters, 1);
                 }}
                 placeholder="Nombre, correo o usuario"
                 type="search"
@@ -185,7 +204,7 @@ export function UserManagement() {
               Filtros
               {activeFiltersCount ? <span className="filter-count">{activeFiltersCount}</span> : null}
             </button>
-            <button className="secondary-action compact" onClick={() => loadUsers()} type="button">
+            <button className="secondary-action compact" onClick={() => loadUsers(filters, 1)} type="button">
               <Search size={17} aria-hidden="true" />
               Buscar
             </button>
@@ -196,28 +215,28 @@ export function UserManagement() {
           <div className="user-filters">
             <label>
               <span>Rol</span>
-              <select value={filters.role} onChange={(event) => updateFilter("role", event.target.value)}>
+              <SearchSelect value={filters.role} onChange={(event) => updateFilter("role", event.target.value)}>
                 <option value="">Todos</option>
                 {ROLE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </SearchSelect>
             </label>
             <label>
               <span>Estado</span>
-              <select value={filters.isActive} onChange={(event) => updateFilter("isActive", event.target.value)}>
+              <SearchSelect value={filters.isActive} onChange={(event) => updateFilter("isActive", event.target.value)}>
                 <option value="">Todos</option>
                 <option value="true">Activos</option>
                 <option value="false">Inactivos</option>
-              </select>
+              </SearchSelect>
             </label>
             <div className="user-filter-buttons">
               <button className="secondary-action compact" onClick={clearFilters} type="button">
                 Limpiar
               </button>
-              <button className="primary-action compact" onClick={() => loadUsers()} type="button">
+              <button className="primary-action compact" onClick={() => loadUsers(filters, 1)} type="button">
                 Aplicar
               </button>
             </div>
@@ -229,7 +248,7 @@ export function UserManagement() {
             <span>Usuario</span>
             <span>Rol</span>
             <span>Estado</span>
-            <span>Perfil</span>
+            <span>Pais</span>
             <span>Acciones</span>
           </div>
 
@@ -237,21 +256,31 @@ export function UserManagement() {
           {!isLoading && users.length === 0 ? <div className="empty-state">Sin usuarios para mostrar</div> : null}
 
           {!isLoading &&
-            users.map((user) => (
-              <article className="table-row user-row" key={user.id}>
+            users.map((user) => {
+              const countryName = user.country?.name || user.profile?.country?.name;
+              const name = user.full_name || user.username;
+              const email = user.email || user.username;
+              return (
+              <article
+                className={`table-row user-row role-${String(user.primary_role || "none").toLowerCase()}${user.is_active ? "" : " is-inactive"}`}
+                key={user.id}
+              >
                 <div className="user-identity">
                   <span className="user-avatar">{getInitials(user)}</span>
                   <div>
-                    <strong>{user.full_name || user.username}</strong>
-                    <small>{user.email || user.username}</small>
+                    <strong title={name}>{name}</strong>
+                    <small title={email}>{email}</small>
                   </div>
                 </div>
                 <span className="role-badge">
                   <ShieldCheck size={14} aria-hidden="true" />
                   {roleLabel(user.primary_role)}
                 </span>
-                <span className={user.is_active ? "status-badge confirmed" : "status-badge cancelled"}>{user.is_active ? "Activo" : "Inactivo"}</span>
-                <span>{user.country?.name || user.profile?.country?.name || "Global"}</span>
+                <span className={user.is_active ? "user-status active" : "user-status"}>{user.is_active ? "Activo" : "Inactivo"}</span>
+                <span className="user-country">
+                  {countryName ? <MapPin size={14} aria-hidden="true" /> : <Globe2 size={14} aria-hidden="true" />}
+                  {countryName || "Global"}
+                </span>
                 <div className="row-actions">
                   <button className="icon-button" onClick={() => openEdit(user)} type="button" aria-label="Editar usuario">
                     <Edit3 size={17} aria-hidden="true" />
@@ -264,8 +293,10 @@ export function UserManagement() {
                   </button>
                 </div>
               </article>
-            ))}
+              );
+            })}
         </div>
+        <Pagination isLoading={isLoading} onPageChange={(nextPage) => loadUsers(filters, nextPage)} page={page} total={total} />
       </div>
 
       {modalState.isOpen ? (
