@@ -127,6 +127,7 @@ export function AppointmentCalendar() {
               renderItem={(appointment) => (
                 <AppointmentRow
                   appointment={appointment}
+                  canPrescribe={user?.role === "doctor"}
                   key={appointment.id}
                   locale={locale}
                   onConfirm={confirmAppointment}
@@ -214,6 +215,7 @@ export function AppointmentCalendar() {
               renderItem={(appointment) => (
                 <AppointmentRow
                   appointment={appointment}
+                  canPrescribe={user?.role === "doctor"}
                   key={appointment.id}
                   locale={locale}
                   onConfirm={confirmAppointment}

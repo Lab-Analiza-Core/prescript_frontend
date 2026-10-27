@@ -84,3 +84,8 @@ export async function publishTerms(payload) {
   const response = await api.post("/admin/terms", payload);
   return response.data;
 }
+
+export async function activateTerms(termsId) {
+  const response = await api.post(`/admin/terms/${termsId}/activate`);
+  return response.data;
+}

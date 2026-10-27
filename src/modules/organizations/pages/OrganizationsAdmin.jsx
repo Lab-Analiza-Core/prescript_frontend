@@ -56,6 +56,12 @@ function OrganizationsAdminContent({ countries }) {
   const organizations = data || [];
   const selectedOrganization = organizations.find((organization) => organization.id === selected);
 
+  // El panel de gestion queda debajo de la lista: se baja hasta el para que se note que se abrio.
+  const selectOrganization = (id) => {
+    setSelected(id);
+    setTimeout(() => document.getElementById("organization-workspace")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
+
   const saveOrganization = async (payload) => {
     setIsSaving(true);
     try {
@@ -159,15 +165,17 @@ function OrganizationsAdminContent({ countries }) {
                   </strong>
                   <span>{organization.country_name}</span>
                   <span>{organization.division_name ? `${organization.division_type}: ${organization.division_name}` : "—"}</span>
-                  <span>{organization.medical_area_name || "—"}</span>
+                  <span title={(organization.medical_area_names || []).join(", ")}>
+                    {organization.medical_area_names?.join(", ") || "—"}
+                  </span>
                   <span className={organization.status === "active" ? "status-badge confirmed" : "status-badge cancelled"}>
                     {ORGANIZATION_STATUS_LABELS[organization.status] || organization.status}
                   </span>
                   <div className="row-actions">
-                    <button className="icon-button" onClick={() => setSelected(organization.id)} type="button" aria-label="Gestionar organizacion">
+                    <button className="icon-button" onClick={() => selectOrganization(organization.id)} type="button" aria-label="Gestionar organizacion" title="Gestionar: miembros, invitaciones y apariencia">
                       <Settings2 size={16} aria-hidden="true" />
                     </button>
-                    <button className="icon-button" onClick={() => setModal({ isOpen: true, organization })} type="button" aria-label="Editar organizacion">
+                    <button className="icon-button" onClick={() => setModal({ isOpen: true, organization })} type="button" aria-label="Editar organizacion" title="Editar datos de la organizacion">
                       <Edit3 size={16} aria-hidden="true" />
                     </button>
                   </div>
@@ -178,11 +186,11 @@ function OrganizationsAdminContent({ countries }) {
           </div>
 
           {selectedOrganization ? (
-            <section className="user-control-panel" aria-label={`Gestion de ${selectedOrganization.name}`}>
+            <section className="user-control-panel" id="organization-workspace" aria-label={`Gestion de ${selectedOrganization.name}`}>
               <div className="user-control-header">
                 <div>
                   <h2>{selectedOrganization.name}</h2>
-                  <span>Miembros, invitaciones y vinculos de secretarias</span>
+                  <span>Administre a las personas, invitaciones, secretarias y apariencia de esta organizacion</span>
                 </div>
               </div>
               <OrganizationWorkspace isGlobal key={selectedOrganization.id} organization={selectedOrganization} />

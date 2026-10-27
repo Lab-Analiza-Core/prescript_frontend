@@ -1,5 +1,6 @@
-import { Edit3, Filter, Plus, Search, UserX } from "lucide-react";
+import { Edit3, FilePlus2, Filter, Plus, Search, UserX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { createPatient, deactivatePatient, listPatients, updatePatient } from "../services/patientService";
 import { listDoctors } from "../../../shared/services/doctorService";
@@ -10,6 +11,8 @@ import { DeactivatePatientDialog } from "../components/DeactivatePatientDialog";
 import { PatientModal } from "../components/PatientModal";
 import { getCountryLocale } from "../../../shared/utils/countryUtils";
 import { SearchSelect } from "../../../shared/components/SearchSelect";
+
+import "../patients.css";
 
 const formatDate = (value, locale) => {
   if (!value) return "Sin fecha";
@@ -289,9 +292,18 @@ export function PatientList() {
           patients.map((patient) => (
             <article className="table-row patient-row" key={patient.id}>
               <span>{patient.dni || "Sin DNI"}</span>
-              <strong>{patient.full_name}{patient.is_active === false ? " (inactivo)" : ""}</strong>
+              <strong>
+                <Link className="patient-link" to={`/app/pacientes/${patient.id}`}>
+                  {patient.full_name}{patient.is_active === false ? " (inactivo)" : ""}
+                </Link>
+              </strong>
               <span>{formatDate(patient.created_at, locale)}</span>
               <div className="row-actions">
+                {user?.role === "doctor" && patient.is_active !== false ? (
+                  <Link aria-label="Nueva receta" className="icon-button" title="Nueva receta" to={`/app/recetas?patient=${patient.id}`}>
+                    <FilePlus2 size={17} aria-hidden="true" />
+                  </Link>
+                ) : null}
                 <button className="icon-button" onClick={() => openEditModal(patient)} type="button" aria-label="Modificar paciente">
                   <Edit3 size={17} aria-hidden="true" />
                 </button>

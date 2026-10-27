@@ -1,11 +1,14 @@
-import { FileText, HeartPulse, MessageCircle, UserRound, WalletCards } from "lucide-react";
+import { FilePlus2, FileText, HeartPulse, MessageCircle, UserRound, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
 import { getPatient } from "../services/patientService";
+import { listPatientPrescriptions } from "../../prescriptions/services/prescriptionService";
 import { PageHeader } from "../../../shared/components/PageHeader";
 import { useAuth } from "../../../shared/context/useAuth";
 import { getCountryLocale } from "../../../shared/utils/countryUtils";
+
+import "../../prescriptions/prescriptions.css";
 
 const tabs = [
   { label: "Clinico", icon: HeartPulse },
@@ -78,8 +81,11 @@ export function PatientDetail() {
   const { user } = useAuth();
   const locale = getCountryLocale(user?.country);
   const { patientId } = useParams();
+  const location = useLocation();
   const [patient, setPatient] = useState(null);
-  const [activeTab, setActiveTab] = useState("Clinico");
+  const [activeTab, setActiveTab] = useState(location.state?.tab || "Clinico");
+  const [prescriptions, setPrescriptions] = useState(null);
+  const [prescriptionsError, setPrescriptionsError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -109,6 +115,21 @@ export function PatientDetail() {
     };
   }, [patientId]);
 
+  useEffect(() => {
+    if (activeTab !== "Recetas") return undefined;
+    let isMounted = true;
+    listPatientPrescriptions(patientId)
+      .then((payload) => {
+        if (!isMounted) return;
+        setPrescriptions(Array.isArray(payload) ? payload : payload.results || []);
+        setPrescriptionsError("");
+      })
+      .catch(() => isMounted && setPrescriptionsError("No se pudo cargar el historial de recetas."));
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, patientId]);
+
   const profile = patient?.medical_profile || {};
   const latestVitals = patient?.latest_vitals;
   const recentVitals = useMemo(() => patient?.recent_vitals || [], [patient]);
@@ -117,10 +138,18 @@ export function PatientDetail() {
     <div className="page-stack">
       <PageHeader
         actions={
-          <button className="secondary-action compact" type="button">
-            <MessageCircle size={18} aria-hidden="true" />
-            WhatsApp
-          </button>
+          <>
+            {user?.role === "doctor" ? (
+              <Link className="primary-action compact" to={`/app/recetas?patient=${patientId}`}>
+                <FilePlus2 size={18} aria-hidden="true" />
+                Nueva receta
+              </Link>
+            ) : null}
+            <button className="secondary-action compact" type="button">
+              <MessageCircle size={18} aria-hidden="true" />
+              WhatsApp
+            </button>
+          </>
         }
         eyebrow="Paciente"
         title={patient?.full_name || "Expediente del paciente"}
@@ -235,9 +264,24 @@ export function PatientDetail() {
       ) : null}
 
       {!isLoading && patient && activeTab === "Recetas" ? (
-        <section className="detail-panel">
-          <h2>Recetas</h2>
-          <p className="patient-muted-line">Historial de recetas pendiente de conectar al expediente.</p>
+        <section className="table-panel">
+          {prescriptionsError ? <p className="form-error" role="alert">{prescriptionsError}</p> : null}
+          {!prescriptionsError && prescriptions === null ? <div className="empty-state">Cargando recetas</div> : null}
+          {prescriptions?.length === 0 ? <div className="empty-state">Este paciente aun no tiene recetas</div> : null}
+          {prescriptions?.map((prescription) => (
+            <article className="table-row prescription-history-row" key={prescription.id}>
+              <strong>{formatDateTime(prescription.created_at, locale)}</strong>
+              <span>{prescription.diagnosis || "Sin diagnostico"}</span>
+              <ul className="prescription-history-items">
+                {prescription.items.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.medicine_name}</strong> · {item.dosage}, {item.frequency}, {item.duration}
+                    {item.instructions ? <small>{item.instructions}</small> : null}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
         </section>
       ) : null}
 

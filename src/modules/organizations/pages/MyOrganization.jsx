@@ -32,7 +32,7 @@ export function MyOrganization() {
                 {[
                   organization.country_name,
                   organization.division_name && `${organization.division_type}: ${organization.division_name}`,
-                  organization.medical_area_name,
+                  organization.medical_area_names?.join(", "),
                 ]
                   .filter(Boolean)
                   .join(" · ")}

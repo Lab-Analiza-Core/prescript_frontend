@@ -105,6 +105,7 @@ export function MembersPanel({ canManageAdmins = false, organizationId }) {
                 <button
                   aria-label={member.is_active ? "Desactivar acceso" : "Reactivar acceso"}
                   className={member.is_active ? "icon-button danger-icon-button" : "icon-button"}
+                  title={member.is_active ? "Desactivar acceso" : "Reactivar acceso"}
                   onClick={() => setTarget(member)}
                   type="button"
                 >

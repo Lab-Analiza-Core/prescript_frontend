@@ -1,0 +1,32 @@
+.medicine-toolbar {
+  display: grid;
+  gap: 12px;
+}
+
+.medicine-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px);
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-prescript, 8px);
+  background: color-mix(in srgb, var(--surface-muted) 55%, transparent);
+}
+
+.medicine-filters label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.medicine-card {
+  position: relative;
+}
+
+.medicine-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}

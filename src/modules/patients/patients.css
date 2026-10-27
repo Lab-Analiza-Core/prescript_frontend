@@ -1,0 +1,10 @@
+.patient-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.patient-link:hover,
+.patient-link:focus-visible {
+  color: var(--primary);
+  text-decoration: underline;
+}

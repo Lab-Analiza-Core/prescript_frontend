@@ -8,10 +8,10 @@ import { MembersPanel } from "./MembersPanel";
 import { GLOBAL_INVITE_ROLES, MEMBER_INVITE_ROLES } from "../organizationConstants";
 
 const TABS = [
-  { key: "members", label: "Miembros", icon: UsersRound },
-  { key: "invitations", label: "Invitaciones", icon: KeyRound },
-  { key: "assignments", label: "Secretarias", icon: Link2 },
-  { key: "appearance", label: "Apariencia", icon: Palette },
+  { key: "members", label: "Miembros", icon: UsersRound, help: "Personas que ya forman parte de la organizacion. Puede desactivar o reactivar su acceso." },
+  { key: "invitations", label: "Invitaciones", icon: KeyRound, help: "Cree un codigo y compartalo con quien debe registrarse en esta organizacion." },
+  { key: "assignments", label: "Secretarias", icon: Link2, help: "Elija que doctores atiende cada secretaria. Ella solo vera los pacientes y citas de esos doctores." },
+  { key: "appearance", label: "Apariencia", icon: Palette, help: "Logo, letra y colores que veran los usuarios de esta organizacion." },
 ];
 
 // Gestion de una organizacion: la usan el administrador de organizacion (la suya) y el global (cualquiera).
@@ -35,6 +35,8 @@ export function OrganizationWorkspace({ isGlobal = false, organization }) {
           </button>
         ))}
       </div>
+
+      <p className="theme-hint workspace-help">{TABS.find(({ key }) => key === tab).help}</p>
 
       {tab === "members" ? <MembersPanel canManageAdmins={isGlobal} organizationId={organization.id} /> : null}
       {tab === "invitations" ? (

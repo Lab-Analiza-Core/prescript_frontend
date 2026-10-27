@@ -39,6 +39,7 @@ export function OrgAdminRequestsPanel() {
 
   return (
     <div className="panel-stack">
+      <p className="theme-hint workspace-help">Personas que pidieron administrar una organizacion. Al aprobar o rechazar, se les avisa por correo.</p>
       <div className="inline-form">
         <label>
           <span>Estado</span>
@@ -79,12 +80,12 @@ export function OrgAdminRequestsPanel() {
             </span>
             <div className="row-actions">
               {profile.status !== "active" ? (
-                <button className="icon-button" onClick={() => setDecision({ profile, approve: true })} type="button" aria-label="Aprobar">
+                <button className="icon-button" onClick={() => setDecision({ profile, approve: true })} type="button" aria-label="Aprobar" title="Aprobar">
                   <Check size={16} aria-hidden="true" />
                 </button>
               ) : null}
               {profile.status === "pending" ? (
-                <button className="icon-button danger-icon-button" onClick={() => setDecision({ profile, approve: false })} type="button" aria-label="Rechazar">
+                <button className="icon-button danger-icon-button" onClick={() => setDecision({ profile, approve: false })} type="button" aria-label="Rechazar" title="Rechazar">
                   <X size={16} aria-hidden="true" />
                 </button>
               ) : null}

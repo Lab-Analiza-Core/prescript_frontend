@@ -934,11 +934,15 @@ textarea:focus {
   @apply rounded-prescript border border-prescript-line bg-prescript-surface;
 }
 
-.metric-card {
+.metric-card,
+.medicine-card,
+.prescription-paper {
   @apply relative overflow-hidden p-[18px] shadow-[0_12px_28px_rgba(20,36,42,0.07)];
 }
 
-.metric-card::before {
+.metric-card::before,
+.medicine-card::before,
+.prescription-paper::before {
   content: "";
   @apply absolute w-[5px];
   inset: 0 auto 0 0;
@@ -966,8 +970,9 @@ textarea:focus {
 
 .appointment-row:hover,
 .table-row:not(.table-head):hover,
+/* El realce sale del color principal del tema, no de un tono fijo. */
 .medicine-card:hover {
-  @apply bg-prescript-paper/70;
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
 }
 
 .appointment-page {
@@ -1589,13 +1594,9 @@ dd {
   @apply col-span-full;
 }
 
+/* Misma tarjeta que .metric-card: superficie, borde y barra lateral salen de las variables del tema. */
 .prescription-paper {
-  @apply min-h-[260px] p-[22px] shadow-prescript-paper;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--copper) 18%, transparent) 1px, transparent 1px),
-    repeating-linear-gradient(0deg, transparent 0 31px, color-mix(in srgb, var(--line) 55%, transparent) 32px),
-    var(--paper);
-  background-size: 48px 100%, auto;
+  @apply min-h-[260px] py-[22px] pl-[28px] pr-[22px];
 }
 
 .prescription-paper h2 {
@@ -1607,7 +1608,7 @@ dd {
 }
 
 .medicine-card {
-  @apply grid min-h-[136px] content-start gap-2 p-3.5 shadow-[0_12px_28px_rgba(20,36,42,0.06)];
+  @apply grid min-h-[136px] content-start gap-2 py-3.5 pl-5 pr-3.5 shadow-[0_12px_28px_rgba(20,36,42,0.06)];
 }
 
 .star-button {
@@ -1726,6 +1727,83 @@ dd {
 
 .form-modal label > small {
   @apply -mt-0.5 text-xs leading-normal;
+}
+
+.medical-area-field {
+  @apply m-0 grid min-w-0 gap-2 border-0 p-0;
+}
+
+.medical-area-field > legend {
+  @apply mb-[9px] p-0 text-[14px] font-extrabold text-prescript-muted;
+}
+
+.medical-area-field:focus-within > legend {
+  @apply text-prescript-primary-dark;
+}
+
+.medical-area-field > small {
+  @apply text-xs leading-normal text-prescript-muted;
+}
+
+.medical-area-selector {
+  @apply overflow-hidden rounded-prescript border border-prescript-line bg-prescript-surface;
+}
+
+.medical-area-field:disabled .medical-area-selector {
+  @apply cursor-not-allowed opacity-60;
+}
+
+.medical-area-selected {
+  @apply flex flex-wrap gap-2 border-b border-prescript-line bg-prescript-muted-surface/55 p-2.5;
+}
+
+.medical-area-selected button {
+  @apply inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-full border border-prescript-primary/20 bg-prescript-primary/10 px-3 text-xs font-extrabold text-prescript-primary-dark;
+}
+
+.medical-area-placeholder {
+  @apply block border-b border-prescript-line px-3 py-3 text-sm text-prescript-muted;
+}
+
+.medical-area-search {
+  @apply flex items-center gap-2 border-b border-prescript-line px-3 text-prescript-muted;
+}
+
+.medical-area-search input {
+  @apply min-h-11 w-full border-0 bg-transparent p-0 text-sm font-normal text-prescript-ink shadow-none outline-none;
+}
+
+.medical-area-options {
+  @apply grid max-h-44 gap-1 overflow-y-auto p-1.5;
+}
+
+.medical-area-options > span {
+  @apply px-2.5 py-3 text-center text-[13px] text-prescript-muted;
+}
+
+.medical-area-option {
+  @apply flex min-h-9 cursor-pointer items-center gap-2.5 rounded-prescript px-2.5 py-2 text-sm font-normal text-prescript-ink;
+}
+
+.medical-area-option:hover,
+.medical-area-option.selected {
+  @apply bg-prescript-muted-surface;
+}
+
+.medical-area-option input {
+  @apply size-4 flex-none accent-prescript-primary;
+}
+
+.medical-area-option > span {
+  @apply min-w-0 flex-1;
+}
+
+.medical-area-option.selected > span {
+  @apply font-bold;
+}
+
+.medical-area-option > svg {
+  @apply flex-none text-prescript-primary;
 }
 
 .form-modal .modal-actions {
@@ -3155,6 +3233,62 @@ dd {
   @apply min-h-[160px] resize-y px-3 py-2.5 text-sm leading-relaxed;
 }
 
+.terms-layout {
+  @apply grid items-start gap-4 lg:grid-cols-[300px_minmax(0,1fr)];
+}
+
+.terms-version-list {
+  @apply m-0 grid max-h-[520px] list-none gap-2 overflow-y-auto p-0;
+}
+
+.terms-version-card {
+  @apply grid w-full cursor-pointer gap-1 rounded-prescript border border-prescript-line bg-prescript-surface px-3.5 py-3 text-left text-prescript-ink;
+}
+
+.terms-version-card:hover {
+  @apply border-prescript-line-strong;
+}
+
+.terms-version-card.selected {
+  @apply border-prescript-primary bg-prescript-primary/10;
+}
+
+.terms-version-card small {
+  @apply text-xs font-semibold text-prescript-muted;
+}
+
+.terms-version-head {
+  @apply flex items-center justify-between gap-2;
+}
+
+.terms-detail {
+  @apply grid min-w-0 gap-3 rounded-prescript border border-prescript-line bg-prescript-surface p-4;
+}
+
+.terms-detail-head {
+  @apply flex flex-wrap items-start justify-between gap-3;
+}
+
+.terms-detail-head h3 {
+  @apply m-0 flex items-center gap-2 text-base text-prescript-primary-dark;
+}
+
+.terms-detail-head small {
+  @apply inline-flex flex-wrap items-center gap-1 text-xs font-semibold text-prescript-muted;
+}
+
+.terms-current-flag {
+  @apply inline-flex items-center gap-1.5 text-sm font-extrabold text-prescript-primary;
+}
+
+.terms-preview {
+  @apply max-h-[380px];
+}
+
+.terms-form-actions {
+  @apply flex flex-wrap gap-2;
+}
+
 /* Etiqueta de cuentas externas */
 .external-badge {
   @apply inline-flex w-fit items-center gap-1 rounded-full bg-prescript-warning/15 px-2 py-0.5 align-middle text-[11px] font-extrabold uppercase tracking-wide text-prescript-warning;
@@ -3433,6 +3567,26 @@ dd {
   @apply text-xs font-normal text-prescript-muted;
 }
 
+.workspace-help {
+  @apply m-0 px-1 text-[13px];
+}
+
+.theme-actions {
+  @apply grid gap-2 border-b border-prescript-line pb-3;
+}
+
+.theme-advanced > summary {
+  @apply flex cursor-pointer items-center gap-2 text-[15px] font-bold;
+}
+
+.theme-advanced[open] > summary {
+  @apply mb-3;
+}
+
+.theme-advanced[open] {
+  @apply gap-3;
+}
+
 .theme-logo-bar {
   @apply flex min-h-[60px] items-center rounded-prescript px-4 py-2;
 }
@@ -3503,12 +3657,121 @@ dd {
   background: color-mix(in srgb, var(--danger) 12%, transparent);
 }
 
+.theme-palettes {
+  @apply grid gap-3 sm:grid-cols-2;
+}
+
+.theme-palette {
+  @apply grid cursor-pointer gap-1.5 rounded-prescript border border-prescript-line bg-prescript-surface p-3 text-left;
+}
+
+.theme-palette:hover {
+  border-color: var(--primary);
+}
+
+.theme-palette strong {
+  @apply text-[14px];
+}
+
+.theme-palette small {
+  @apply text-xs font-normal text-prescript-muted;
+}
+
+.theme-palette-swatches {
+  @apply flex overflow-hidden rounded-prescript border border-prescript-line;
+}
+
+.theme-palette-swatches i {
+  @apply block h-8 flex-1;
+}
+
 .theme-live {
   @apply flex items-start gap-2 text-[13px] text-prescript-muted;
 }
 
 .theme-live input {
   @apply mt-0.5 min-h-0 w-auto flex-none;
+}
+
+.theme-step {
+  @apply inline-grid h-6 w-6 flex-none place-items-center rounded-full bg-prescript-muted-surface text-xs font-bold;
+}
+
+.theme-brand {
+  @apply grid gap-1 text-[13px] font-bold text-prescript-ink;
+}
+
+.theme-group {
+  @apply rounded-prescript border border-prescript-line;
+}
+
+.theme-group > summary {
+  @apply flex cursor-pointer items-center gap-3 px-3 py-2.5 text-[14px] font-bold;
+}
+
+.theme-group > summary > span:first-child {
+  @apply flex-1;
+}
+
+.theme-group[open] > summary {
+  @apply border-b border-prescript-line;
+}
+
+.theme-group .theme-token-grid {
+  @apply p-3;
+}
+
+.theme-group-swatches {
+  @apply flex overflow-hidden rounded border border-prescript-line;
+}
+
+.theme-group-swatches i {
+  @apply block h-4 w-4;
+}
+
+.theme-token-label {
+  @apply flex items-center justify-between gap-2;
+}
+
+.theme-inherited {
+  @apply text-xs font-normal text-prescript-muted;
+}
+
+.theme-group > summary .link-action {
+  @apply text-xs;
+}
+
+.theme-preview-tabs {
+  @apply mb-2 flex gap-1;
+}
+
+.theme-preview-tabs button {
+  @apply min-h-0 cursor-pointer rounded-full border border-prescript-line bg-transparent px-2.5 py-1 text-xs font-bold text-prescript-muted;
+}
+
+.theme-preview-tabs button.active {
+  @apply border-prescript-primary bg-prescript-muted-surface text-prescript-ink;
+}
+
+.theme-preview-input {
+  @apply block rounded border px-2 py-1;
+  background: var(--pv-bg);
+  border-color: var(--pv-border);
+}
+
+.theme-preview-error {
+  color: var(--pv-error);
+}
+
+.theme-preview-alert {
+  @apply block rounded border-l-4 px-2 py-1 font-bold;
+  border-color: var(--pv-tone);
+  color: var(--pv-tone);
+  background: color-mix(in srgb, var(--pv-tone) 10%, var(--pv-surface));
+}
+
+.theme-changes {
+  @apply m-0 text-[13px] text-prescript-muted;
 }
 
 .theme-editor-side .primary-action:disabled {

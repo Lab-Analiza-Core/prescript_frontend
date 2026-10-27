@@ -2,10 +2,12 @@ import {
   CalendarCheck,
   CalendarX2,
   Clock,
+  FilePlus2,
   MessageCircle,
   RotateCcw,
   UserX,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { ExternalBadge } from "../../../shared/components/ExternalBadge";
 import {
@@ -16,6 +18,7 @@ import {
 
 export function AppointmentRow({
   appointment,
+  canPrescribe = false,
   locale,
   onConfirm,
   onMarkAttended,
@@ -56,6 +59,18 @@ export function AppointmentRow({
         <span className={`status-badge ${isPendingClosure ? "pending" : statusTone[appointment.status] || ""}`}>
           {isPendingClosure ? "Pendiente de cierre" : statusLabels[appointment.status] || appointment.status}
         </span>
+
+        {canPrescribe && appointment.status === "attended" ? (
+          <div className="appointment-action-controls">
+            <Link
+              className="appointment-action-button"
+              to={`/app/recetas?patient=${appointment.patient}&appointment=${appointment.id}`}
+            >
+              <FilePlus2 size={15} aria-hidden="true" />
+              Receta
+            </Link>
+          </div>
+        ) : null}
 
         {isPendingClosure ? (
           <div className="appointment-action-controls">

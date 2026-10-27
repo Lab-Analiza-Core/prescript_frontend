@@ -91,7 +91,7 @@ export function AssignmentsPanel({ organizationId }) {
           </SearchSelect>
         </label>
         <label>
-          <span>Doctor</span>
+          <span>Atiende al doctor</span>
           <SearchSelect onChange={(event) => setForm({ ...form, doctor: event.target.value })} value={form.doctor}>
             <option value="">Seleccione</option>
             {doctors.map((member) => (
@@ -103,7 +103,7 @@ export function AssignmentsPanel({ organizationId }) {
         </label>
         <button className="primary-action compact" disabled={isSaving} type="submit">
           <Link2 size={17} aria-hidden="true" />
-          Vincular
+          Asignar
         </button>
       </form>
 
@@ -115,14 +115,16 @@ export function AssignmentsPanel({ organizationId }) {
         </div>
 
         {assignments.isLoading && !assignments.data ? <div className="empty-state">Cargando vinculos</div> : null}
-        {assignments.data && allRows.length === 0 ? <div className="empty-state">Sin vinculos registrados</div> : null}
+        {assignments.data && allRows.length === 0 ? <div className="empty-state">{secretaries.length && doctors.length
+              ? "Ninguna secretaria tiene doctores asignados todavia."
+              : "Para asignar, primero deben registrarse al menos una secretaria y un doctor (use la pestana Invitaciones)."}</div> : null}
 
         {rows.map((row) => (
           <article className="table-row admin-row" key={row.id} style={{ "--cols": COLUMNS }}>
             <strong>{row.secretary_name}</strong>
             <span>{row.doctor_name}</span>
             <div className="row-actions">
-              <button className="icon-button danger-icon-button" onClick={() => setToDelete(row)} type="button" aria-label="Eliminar vinculo">
+              <button className="icon-button danger-icon-button" onClick={() => setToDelete(row)} type="button" aria-label="Quitar asignacion" title="Quitar asignacion">
                 <Trash2 size={16} aria-hidden="true" />
               </button>
             </div>

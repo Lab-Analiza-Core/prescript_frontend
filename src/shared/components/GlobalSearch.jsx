@@ -120,6 +120,7 @@ export function GlobalSearch({ country, countryCode }) {
     setIsOpen(false);
     setQuery("");
     setResults([]);
+    setActiveIndex(-1);
     navigate(result.destination);
   };
 
@@ -145,7 +146,7 @@ export function GlobalSearch({ country, countryCode }) {
       <div className={isOpen ? "search-shell active" : "search-shell"}>
         <Search size={18} aria-hidden="true" />
         <input
-          aria-activedescendant={activeIndex >= 0 ? `${listboxId}-${results[activeIndex].key}` : undefined}
+          aria-activedescendant={results[activeIndex] ? `${listboxId}-${results[activeIndex].key}` : undefined}
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-expanded={isOpen}

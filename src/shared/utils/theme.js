@@ -120,3 +120,26 @@ export function contrastRatio(foreground, background) {
   const [lighter, darker] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
   return (lighter + 0.05) / (darker + 0.05);
 }
+
+const mixHex = (hex, target, amount) => {
+  const channels = [1, 3, 5].map((index) => {
+    const from = parseInt(hex.slice(index, index + 2), 16);
+    return Math.round(from + (target - from) * amount)
+      .toString(16)
+      .padStart(2, "0");
+  });
+  return `#${channels.join("").toUpperCase()}`;
+};
+
+// Oscurece o aclara `color` lo minimo necesario para llegar a `minContrast` contra todos los fondos.
+export function fixContrast(color, backgrounds, minContrast) {
+  const passes = (candidate) => backgrounds.every((background) => contrastRatio(candidate, background) >= minContrast);
+  for (let step = 1; step <= 50; step += 1) {
+    const amount = step / 50;
+    const darker = mixHex(color, 0, amount);
+    if (passes(darker)) return darker;
+    const lighter = mixHex(color, 255, amount);
+    if (passes(lighter)) return lighter;
+  }
+  return passes("#000000") ? "#000000" : "#FFFFFF";
+}

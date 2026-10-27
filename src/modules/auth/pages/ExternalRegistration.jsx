@@ -252,7 +252,7 @@ export function ExternalRegistration() {
                   {[
                     organization.country.name,
                     organization.division && `${organization.division_type}: ${organization.division}`,
-                    organization.medical_area,
+                    organization.medical_areas?.join(", "),
                   ]
                     .filter(Boolean)
                     .join(" · ")}

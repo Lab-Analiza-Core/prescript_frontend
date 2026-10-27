@@ -61,7 +61,7 @@ export function InvitationsPanel({ allowedRoles, organization }) {
     setIsSaving(true);
     try {
       await revokeInvitation(toRevoke.id);
-      showToast("Invitacion revocada.", "success");
+      showToast("Codigo desactivado.", "success");
       setToRevoke(null);
       reload();
     } catch (requestError) {
@@ -77,7 +77,7 @@ export function InvitationsPanel({ allowedRoles, organization }) {
     <div className="panel-stack">
       <form className="inline-form invitation-form" onSubmit={handleCreate}>
         <label>
-          <span>Rol</span>
+          <span>Para registrarse como</span>
           <SearchSelect name="role" onChange={updateField} value={form.role}>
             {allowedRoles.map((role) => (
               <option key={role.value} value={role.value}>
@@ -87,11 +87,11 @@ export function InvitationsPanel({ allowedRoles, organization }) {
           </SearchSelect>
         </label>
         <label>
-          <span>Usos maximos</span>
+          <span>Personas que pueden usarlo</span>
           <input min="1" name="maxUses" onChange={updateField} placeholder="Sin limite" type="number" value={form.maxUses} />
         </label>
         <label>
-          <span>Vence el</span>
+          <span>Vence el (opcional)</span>
           <input name="expiresAt" onChange={updateField} type="date" value={form.expiresAt} />
         </label>
         <button className="primary-action compact" disabled={isSaving || isSuspended} type="submit">
@@ -105,7 +105,7 @@ export function InvitationsPanel({ allowedRoles, organization }) {
         <div className="table-row table-head admin-row" style={{ "--cols": "minmax(140px,1.2fr) 1fr 0.7fr 1fr 0.7fr 90px" }}>
           <span>Codigo</span>
           <span>Rol</span>
-          <span>Usos</span>
+          <span>Usado</span>
           <span>Vence</span>
           <span>Estado</span>
           <span>Acciones</span>
@@ -113,7 +113,7 @@ export function InvitationsPanel({ allowedRoles, organization }) {
 
         {isLoading && !data ? <div className="empty-state">Cargando invitaciones</div> : null}
         {error ? <div className="empty-state">{getApiErrorMessage(error, "No se pudieron cargar las invitaciones.")}</div> : null}
-        {data && invitations.length === 0 ? <div className="empty-state">Aun no hay invitaciones</div> : null}
+        {data && invitations.length === 0 ? <div className="empty-state">Aun no hay codigos. Cree el primero con "Crear codigo".</div> : null}
 
         {invitations.map((invitation) => {
           const state = getInvitationState(invitation);
@@ -127,11 +127,11 @@ export function InvitationsPanel({ allowedRoles, organization }) {
               <span>{invitation.expires_at ? new Date(invitation.expires_at).toLocaleDateString() : "Sin vencimiento"}</span>
               <span className={state.key === "active" ? "status-badge confirmed" : "status-badge cancelled"}>{state.label}</span>
               <div className="row-actions">
-                <button className="icon-button" onClick={() => copyCode(invitation.code)} type="button" aria-label="Copiar codigo">
+                <button className="icon-button" onClick={() => copyCode(invitation.code)} type="button" aria-label="Copiar codigo" title="Copiar codigo">
                   <Copy size={16} aria-hidden="true" />
                 </button>
                 {state.key === "active" ? (
-                  <button className="icon-button danger-icon-button" onClick={() => setToRevoke(invitation)} type="button" aria-label="Revocar invitacion">
+                  <button className="icon-button danger-icon-button" onClick={() => setToRevoke(invitation)} type="button" aria-label="Desactivar codigo" title="Desactivar codigo">
                     <Ban size={16} aria-hidden="true" />
                   </button>
                 ) : null}
@@ -148,7 +148,7 @@ export function InvitationsPanel({ allowedRoles, organization }) {
           message={`El codigo ${toRevoke.code} dejara de funcionar. Las cuentas ya creadas con el no se afectan.`}
           onClose={() => setToRevoke(null)}
           onConfirm={confirmRevoke}
-          title="Revocar invitacion"
+          title="Desactivar codigo"
         />
       ) : null}
     </div>

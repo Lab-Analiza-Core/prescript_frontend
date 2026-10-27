@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Building2, X } from "lucide-react";
+import { Building2, Check, Search, X } from "lucide-react";
 
 import { listPublicDivisions, listPublicSpecialties } from "../../../shared/services/catalogService";
 import { useApiResource } from "../../../shared/hooks/useApiResource";
 import { SearchSelect } from "../../../shared/components/SearchSelect";
 
-const emptyForm = { name: "", country: "", division: "", medicalArea: "", status: "active" };
+const emptyForm = { name: "", country: "", division: "", medicalAreas: [], status: "active" };
 
 const toForm = (organization) =>
   organization
@@ -13,7 +13,9 @@ const toForm = (organization) =>
         name: organization.name,
         country: String(organization.country),
         division: organization.division ? String(organization.division) : "",
-        medicalArea: organization.medical_area ? String(organization.medical_area) : "",
+        medicalAreas: (
+          organization.medical_areas || (organization.medical_area ? [organization.medical_area] : [])
+        ).map(String),
         status: organization.status,
       }
     : emptyForm;
@@ -22,6 +24,7 @@ const toForm = (organization) =>
 export function OrganizationFormModal({ countries, isSaving, onClose, onSubmit, organization }) {
   const isEditing = Boolean(organization);
   const [form, setForm] = useState(() => toForm(organization));
+  const [medicalAreaQuery, setMedicalAreaQuery] = useState("");
   const selectedCountry = countries.find((country) => String(country.id) === form.country);
   const countryCode = selectedCountry?.code || "";
 
@@ -34,7 +37,15 @@ export function OrganizationFormModal({ countries, isSaving, onClose, onSubmit, 
     `specialties-${countryCode}`,
   );
   const divisionOptions = divisions.data || [];
+  const specialtyOptions = specialties.data || [];
   const divisionLabel = divisionOptions[0]?.division_type || "Division";
+  const normalizedMedicalAreaQuery = medicalAreaQuery.trim().toLowerCase();
+  const filteredSpecialties = specialtyOptions.filter(
+    (specialty) => !normalizedMedicalAreaQuery || specialty.name.toLowerCase().includes(normalizedMedicalAreaQuery),
+  );
+  const selectedSpecialties = specialtyOptions.filter((specialty) =>
+    form.medicalAreas.includes(String(specialty.id)),
+  );
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -42,7 +53,18 @@ export function OrganizationFormModal({ countries, isSaving, onClose, onSubmit, 
   };
 
   const changeCountry = (event) => {
-    setForm((current) => ({ ...current, country: event.target.value, division: "", medicalArea: "" }));
+    setForm((current) => ({ ...current, country: event.target.value, division: "", medicalAreas: [] }));
+    setMedicalAreaQuery("");
+  };
+
+  const toggleMedicalArea = (medicalAreaId) => {
+    const value = String(medicalAreaId);
+    setForm((current) => ({
+      ...current,
+      medicalAreas: current.medicalAreas.includes(value)
+        ? current.medicalAreas.filter((id) => id !== value)
+        : [...current.medicalAreas, value],
+    }));
   };
 
   const handleSubmit = (event) => {
@@ -51,7 +73,7 @@ export function OrganizationFormModal({ countries, isSaving, onClose, onSubmit, 
       name: form.name.trim(),
       country: Number(form.country),
       division: form.division ? Number(form.division) : null,
-      medical_area: form.medicalArea ? Number(form.medicalArea) : null,
+      medical_areas: form.medicalAreas.map(Number),
       ...(isEditing ? { status: form.status } : {}),
     });
   };
@@ -103,17 +125,68 @@ export function OrganizationFormModal({ countries, isSaving, onClose, onSubmit, 
             </SearchSelect>
           </label>
 
-          <label className="field-wide">
-            <span>Area medica</span>
-            <SearchSelect disabled={!countryCode} name="medicalArea" onChange={updateField} value={form.medicalArea}>
-              <option value="">Sin area medica</option>
-              {(specialties.data || []).map((specialty) => (
-                <option key={specialty.id} value={specialty.id}>
-                  {specialty.name}
-                </option>
-              ))}
-            </SearchSelect>
-          </label>
+          <fieldset className="field-wide medical-area-field" disabled={!countryCode}>
+            <legend>Areas medicas</legend>
+            <div className="medical-area-selector">
+              {selectedSpecialties.length > 0 ? (
+                <div className="medical-area-selected" aria-label="Areas medicas seleccionadas">
+                  {selectedSpecialties.map((specialty) => (
+                    <button
+                      aria-label={`Quitar ${specialty.name}`}
+                      key={specialty.id}
+                      onClick={() => toggleMedicalArea(specialty.id)}
+                      type="button"
+                    >
+                      {specialty.name}
+                      <X size={13} aria-hidden="true" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <span className="medical-area-placeholder">
+                  {countryCode ? "Ninguna area seleccionada" : "Seleccione primero un pais"}
+                </span>
+              )}
+
+              {countryCode ? (
+                <>
+                  <label className="medical-area-search">
+                    <Search size={15} aria-hidden="true" />
+                    <input
+                      aria-label="Buscar area medica"
+                      onChange={(event) => setMedicalAreaQuery(event.target.value)}
+                      placeholder="Buscar area medica"
+                      type="search"
+                      value={medicalAreaQuery}
+                    />
+                  </label>
+                  <div className="medical-area-options" role="group" aria-label="Opciones de areas medicas">
+                    {specialties.isLoading && !specialties.data ? <span>Cargando areas medicas</span> : null}
+                    {specialties.error ? <span>No se pudieron cargar las areas medicas.</span> : null}
+                    {!specialties.isLoading && !specialties.error && filteredSpecialties.length === 0 ? (
+                      <span>Sin resultados</span>
+                    ) : null}
+                    {filteredSpecialties.map((specialty) => {
+                      const isSelected = form.medicalAreas.includes(String(specialty.id));
+                      return (
+                        <label className={isSelected ? "medical-area-option selected" : "medical-area-option"} key={specialty.id}>
+                          <input
+                            checked={isSelected}
+                            onChange={() => toggleMedicalArea(specialty.id)}
+                            type="checkbox"
+                            value={specialty.id}
+                          />
+                          <span>{specialty.name}</span>
+                          {isSelected ? <Check size={15} aria-hidden="true" /> : null}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : null}
+            </div>
+            <small>Puede seleccionar una o varias areas.</small>
+          </fieldset>
 
           {isEditing ? (
             <label className="field-wide">
